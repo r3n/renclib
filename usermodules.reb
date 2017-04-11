@@ -1,4 +1,5 @@
 [
+    <mysql> [https://raw.githubusercontent.com/zsx/mysql-r3/ren-c/mysql-protocol-pre.r]
     <json> [https://raw.githubusercontent.com/rgchris/Scripts/master/ren-c/altjson.reb]
     <xml> [http://giuliolunati.altervista.org/r3/altxml.reb]
     <amazon-s3> [http://reb4.me/r3/s3.reb]
