@@ -1,9 +1,9 @@
 [
     <mysql> [https://raw.githubusercontent.com/zsx/mysql-r3/ren-c/mysql-protocol-pre.r]
-    <json> [https://raw.githubusercontent.com/rgchris/Scripts/master/ren-c/altjson.reb]
-    <xml> [http://giuliolunati.altervista.org/r3/altxml.reb]
+    <json> [https://raw.githubusercontent.com/r3n/renclib/master/modules/json.reb]
+    <xml> [https://raw.githubusercontent.com/r3n/renclib/master/modules/xml.reb]
     <amazon-s3> [http://reb4.me/r3/s3.reb]
-    <httpd> [https://raw.githubusercontent.com/rgchris/Scripts/master/ren-c/httpd.reb]
+    <httpd> [https://raw.githubusercontent.com/r3n/renclib/master/modules/httpd.reb]
     <twitter> [https://raw.githubusercontent.com/gchiu/rebolbot/master/twitter.r3]
     <trello> [http://codeconscious.com/rebol-scripts/trello.r]
     <upgrade> [https://raw.githubusercontent.com/gchiu/rebol-misc/master/upgrade.reb]
