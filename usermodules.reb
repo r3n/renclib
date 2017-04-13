@@ -6,6 +6,7 @@
     <mysql> [https://raw.githubusercontent.com/zsx/mysql-r3/ren-c/mysql-protocol-pre.r]
     <rebmu> [https://raw.githubusercontent.com/hostilefork/rebmu/master/rebmu.reb]
     <rem> [https://raw.githubusercontent.com/r3n/giuliolunati.renclib/master/usr/lib/r3/rem.reb]
+    <synctcp> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-synctcp.reb]
     <trello> [http://codeconscious.com/rebol-scripts/trello.r]
     <twitter> [https://raw.githubusercontent.com/gchiu/rebolbot/master/twitter.r3]
     <upgrade> [https://raw.githubusercontent.com/gchiu/rebol-misc/master/upgrade.reb]
