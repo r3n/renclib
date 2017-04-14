@@ -4,6 +4,7 @@
     <httpd> [https://raw.githubusercontent.com/r3n/renclib/master/modules/httpd.reb]
     <json> [https://raw.githubusercontent.com/r3n/renclib/master/modules/json.reb]
     <mysql> [https://raw.githubusercontent.com/zsx/mysql-r3/ren-c/mysql-protocol-pre.r]
+    <pop3> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-pop3.reb]
     <rebmu> [https://raw.githubusercontent.com/hostilefork/rebmu/master/rebmu.reb]
     <rem> [https://raw.githubusercontent.com/r3n/giuliolunati.renclib/master/usr/lib/r3/rem.reb]
     <synctcp> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-synctcp.reb]
