@@ -116,7 +116,7 @@ sys/make-scheme [
 		oauth: target: binary: content: length: timeout: _
 		type: 'application/x-www-form-urlencoded
 		server-software: rejoin [
-			system/script/header/title " v" system/script/header/version " "
+;			system/script/header/title " v" system/script/header/version " "
 			"Rebol/" system/product " v" system/version
 		]
 		server-name: gateway-interface: _
