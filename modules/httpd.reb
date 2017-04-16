@@ -55,7 +55,7 @@ sys/make-scheme [
 			handler: subport: _
 		]
 
-		server/locals/handler: func [
+		server/locals/handler: procedure [
 			request [object!]
 			response [object!]
 		] case [
