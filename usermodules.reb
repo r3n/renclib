@@ -11,5 +11,6 @@
     <trello> [http://codeconscious.com/rebol-scripts/trello.r]
     <twitter> [https://raw.githubusercontent.com/gchiu/rebolbot/master/twitter.r3]
     <upgrade> [https://raw.githubusercontent.com/gchiu/rebol-misc/master/upgrade.reb]
+    <webserver> [https://raw.githubusercontent.com/r3n/renclib/master/scripts/webserver.reb]
     <xml> [https://raw.githubusercontent.com/r3n/renclib/master/modules/xml.reb]
 ]            
