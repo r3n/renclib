@@ -99,7 +99,7 @@ sys/make-scheme [
 
 	actor: [
 		open: func [server [port!]][
-			print ["Server running on port:" server/spec/port-id]
+			; print ["Server running on port:" server/spec/port-id]
 			start server/locals/subport
 			open server/locals/subport
 		]
@@ -286,7 +286,7 @@ sys/make-scheme [
 		]
 
 		func [client [port!] /local response continue?][
-			probe client/locals/wire
+			; probe client/locals/wire
 			client/locals/response: response: make response-prototype []
 			client/locals/parent/locals/handler client/locals/request response
 			write client append make binary! 0 collect [
