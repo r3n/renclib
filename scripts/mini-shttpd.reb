@@ -49,14 +49,15 @@ handle-request: func [config req /local uri type file data ext] [
     reduce [200 type data]
 ]
 
-awake-client: func [event /local port res] [
+awake-client: func [event /local port res err] [
     port: event/port
-    print ["Event type: " event/type]
     switch event/type [
         read [
             either find port/data crlf2bin [
                 res: handle-request port/locals/config port/data
-                start-response port res
+                if err: trap [start-response port res][
+                    probe err close port
+                ]
             ] [
                 read port
             ]
@@ -65,7 +66,9 @@ awake-client: func [event /local port res] [
             either empty? port/locals [
                 close port
             ][
-                send-chunk port
+                if err: trap [send-chunk port][
+                    probe err close port
+                ]
             ]
         ]
         close [close port]
@@ -88,4 +91,4 @@ serve: func [web-port web-root /local listen-port] [
     wait listen-port
 ]
 
-serve 8080 system/options/path
+serve 8000 system/options/path
