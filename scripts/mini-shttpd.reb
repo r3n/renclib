@@ -5,19 +5,21 @@ REBOL [title: "A tiny static HTTP server" author: 'abolka date: 2009-11-04]
 USAGE: r3 webserver.reb [OPTIONS]
 OPTIONS:
   -h, -help, --help : this help
-  -q      : quiet
-  NUMBER  : port number [8000]
+  -q      : verbose: 0 (quiet)
+  -v      : verbose: 2 (debug)
+  INTEGER : port number [8000]
   OTHER   : web root [system/options/path]
 e.g.: 8080 /my/web/root quiet
 }]
 
 root: system/options/path
 port: 8000
-verbose: true
+verbose: 1
 args: system/options/args
 for-each a args [case [
     find ["-h" "-help" "--help"] a [-help quit]
-    find ["-q" "-quiet" "--quiet"] a [verbose: false]
+    find ["-q" "-quiet" "--quiet"] a [verbose: 0]
+    find ["-v"] a [verbose: 2]
     integer? load a [port: load a]
     true [root: to-file a]
 ]]
@@ -64,7 +66,11 @@ send-chunk: func [port] [
     ;; Trying to send data >32'000 bytes at once will trigger R3's internal
     ;; chunking (which is buggy, see above). So we cannot use chunks >32'000
     ;; for our manual chunking.
+    if verbose >= 2
+    [ print/only [length port/locals "->"]]
     unless empty? port/locals [write port take/part port/locals 32'000]
+    if verbose >= 2
+    [ print [length port/locals]]
 ]
 
 handle-request: function [config req] [
@@ -77,10 +83,10 @@ handle-request: function [config req] [
         path: copy uri
     ]
     split-path: split path "/"
-    parse last split-path [some [thru "."] copy ext: to end (probe type: select mime-map ext)]
+    parse last split-path [some [thru "."] copy ext: to end (type: select mime-map ext)]
 
     type: default ["application/octet-stream"]
-    if verbose [
+    if verbose > 0 [
         print spaced ["======^/action:" method uri]
         print spaced ["path:  " path]
         print spaced ["query: " query]
@@ -91,14 +97,17 @@ handle-request: function [config req] [
     reduce [200 type data]
 ]
 
-awake-client: func [event /local port res] [
+awake-client: function [event] [
     port: event/port
     switch event/type [
         read [
             either find port/data crlf2bin [
                 res: handle-request port/locals/config port/data
-                if trap? [start-response port res][
-                    print "READ ERROR"
+                if error? err: trap [start-response port res][
+                    if verbose >= 2 [
+                        print "READ ERROR:"
+                        print err
+                    ]
                     close port
                 ]
             ] [
@@ -109,8 +118,11 @@ awake-client: func [event /local port res] [
             either empty? port/locals [
                 close port
             ][
-                if trap? [send-chunk port][
-                    print "WRITE ERROR"
+                if error? err: trap [send-chunk port][
+                    if verbose >= 2 [
+                        print "WRITE ERROR:"
+                        print err
+                    ]
                     close port
                 ]
             ]
@@ -131,7 +143,7 @@ serve: func [web-port web-root /local listen-port] [
     listen-port: open rejoin [tcp://: web-port]
     listen-port/locals: make object! compose/deep [config: [root: (web-root)]]
     listen-port/awake: :awake-server
-    if verbose [print spaced [
+    if verbose > 0 [print spaced [
         "Serving on port" web-port "with root" web-root "..."
     ]]
     wait listen-port
