@@ -1,4 +1,8 @@
-REBOL [title: "A tiny static HTTP server" author: 'abolka date: 2009-11-04]
+REBOL [
+    title: "A tiny static HTTP server"
+    author: 'abolka
+    date: 2009-11-04
+]
 
 ;; INIT
 -help: does [print {
@@ -35,7 +39,13 @@ chunk-size: chunk-size * 1024
 
 ;; LIBS
 crlf2bin: to binary! join-of crlf crlf
-code-map: make map! [200 "OK" 400 "Forbidden" 404 "Not Found"]
+
+code-map: make map! [
+    200 "OK"
+    400 "Forbidden"
+    404 "Not Found"
+]
+
 mime-map: make map! [
     "css" "text/css"
     "gif" "image/gif"
@@ -47,6 +57,7 @@ mime-map: make map! [
     "r3" "text/plain"
     "reb" "text/plain"
 ]
+
 error-template: trim/auto copy {
     <html><head><title>$code $text</title></head><body><h1>$text</h1>
     <p>Requested URI: <code>$uri</code></p><hr><i>shttpd.r</i> on
@@ -82,8 +93,38 @@ send-chunk: func [port] [
     [ print [length port/locals]]
 ]
 
+html-list-dir: function [
+  "Output dir contents in HTML."
+  dir [file!]
+  ][
+  if error? try [list: read dir] [
+    return _
+  ]
+  sort/compare list func [x y] [
+    case [
+      all [dir? x not dir? y] [true]
+      all [not dir? x dir? y] [false]
+      y > x [true]
+      true [false]
+    ]
+  ]
+  insert list %../
+  data: copy {<head>
+    <meta name="viewport" content="initial-scale=1.0" />
+    <style> a {text-decoration: none} </style>
+  </head>}
+  for-each i list [
+    append data ajoin [
+      {<a href="} i {">}
+      if dir? i ["&gt; "]
+      i </a> <br/>
+    ]
+  ]
+  data
+]
+
 handle-request: function [config req] [
-    parse to-string req [copy method: "get" " " ["/ " | copy uri to " "]]
+    parse to-string req [copy method: "get" " " [copy uri to " "]]
     uri: default ["index.html"]
     either query: find uri "?" [
         path: copy/part uri query
@@ -91,19 +132,31 @@ handle-request: function [config req] [
     ][
         path: copy uri
     ]
-    split-path: split path "/"
-    parse last split-path [some [thru "."] copy ext: to end (type: select mime-map ext)]
-
-    type: default ["application/octet-stream"]
     if verbose > 0 [
         print spaced ["======^/action:" method uri]
         print spaced ["path:  " path]
         print spaced ["query: " query]
-        print spaced ["type:  " type]
     ]
-    if not exists? file: config/root/:path [return error-response 404 uri]
+    filetype: exists? file: config/root/:path
+    unless filetype [return error-response 404 uri]
+    if filetype = 'dir [
+        while [#"/" = last path] [take/last path]
+        append path #"/"
+        if data: html-list-dir file [
+            return reduce [200 "text/html" data]
+        ]
+        return error-response 403 uri
+    ]
+    split-path: split path "/"
+    parse last split-path [
+        some [thru "."]
+        copy ext: to end
+        (mime: select mime-map ext)
+    ]
+    mime: default ["application/octet-stream"]
+    
     if error? try [data: read file] [return error-response 400 uri]
-    reduce [200 type data]
+    reduce [200 mime data]
 ]
 
 awake-client: function [event] [
