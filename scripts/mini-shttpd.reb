@@ -4,6 +4,7 @@ REBOL [title: "A tiny static HTTP server" author: 'abolka date: 2009-11-04]
 -help: does [print {
 USAGE: r3 webserver.reb [OPTIONS]
 OPTIONS:
+  -c N    : chunk-size: N * 1024
   -h, -help, --help : this help
   -q      : verbose: 0 (quiet)
   -v      : verbose: 2 (debug)
@@ -12,17 +13,25 @@ OPTIONS:
 e.g.: 8080 /my/web/root quiet
 }]
 
-root: system/options/path
+chunk-size: 32
 port: 8000
+root: system/options/path
 verbose: 1
-args: system/options/args
-for-each a args [case [
-    find ["-h" "-help" "--help"] a [-help quit]
-    find ["-q" "-quiet" "--quiet"] a [verbose: 0]
-    find ["-v"] a [verbose: 2]
-    integer? load a [port: load a]
-    true [root: to-file a]
+
+a: system/options/args
+forall a [case [
+    "-c" = a/1 [
+        chunk-size: to-integer a/2
+        a: next a
+    ]
+    find ["-h" "-help" "--help"] a/1 [-help quit]
+    find ["-q" "-quiet" "--quiet"] a/1 [verbose: 0]
+    "-v" = a/1 [verbose: 2]
+    integer? load a/1 [port: load a/1]
+    true [root: to-file a/1]
 ]]
+
+chunk-size: chunk-size * 1024
 
 ;; LIBS
 crlf2bin: to binary! join-of crlf crlf
@@ -68,7 +77,7 @@ send-chunk: func [port] [
     ;; for our manual chunking.
     if verbose >= 2
     [ print/only [length port/locals "->"]]
-    unless empty? port/locals [write port take/part port/locals 32'000]
+    unless empty? port/locals [write port take/part port/locals chunk-size]
     if verbose >= 2
     [ print [length port/locals]]
 ]
@@ -144,7 +153,9 @@ serve: func [web-port web-root /local listen-port] [
     listen-port/locals: make object! compose/deep [config: [root: (web-root)]]
     listen-port/awake: :awake-server
     if verbose > 0 [print spaced [
-        "Serving on port" web-port "with root" web-root "..."
+        "Serving on port" web-port newline
+        "with root" web-root newline
+        "and chunk size" chunk-size
     ]]
     wait listen-port
 ]
