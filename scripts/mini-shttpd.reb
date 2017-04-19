@@ -1,12 +1,40 @@
 REBOL [title: "A tiny static HTTP server" author: 'abolka date: 2009-11-04]
 
+;; INIT
+-help: does [print {
+USAGE: r3 webserver.reb [OPTIONS]
+OPTIONS:
+  -h, -help, --help : this help
+  -q      : quiet
+  NUMBER  : port number [8000]
+  OTHER   : web root [system/options/path]
+e.g.: 8080 /my/web/root quiet
+}]
+
+root: system/options/path
+port: 8000
+verbose: true
+args: system/options/args
+for-each a args [case [
+    find ["-h" "-help" "--help"] a [-help quit]
+    find ["-q" "-quiet" "--quiet"] a [verbose: false]
+    integer? load a [port: load a]
+    true [root: to-file a]
+]]
+
+;; LIBS
 crlf2bin: to binary! join-of crlf crlf
 code-map: make map! [200 "OK" 400 "Forbidden" 404 "Not Found"]
 mime-map: make map! [
-    "html" "text/html" "css" "text/css" "js" "application/javascript"
-    "gif" "image/gif" "jpg" "image/jpeg" "png" "image/png"
-    "r" "text/plain" "r3" "text/plain" "reb" "text/plain"
-
+    "css" "text/css"
+    "gif" "image/gif"
+    "html" "text/html"
+    "jpg" "image/jpeg"
+    "js" "application/javascript"
+    "png" "image/png"
+    "r" "text/plain"
+    "r3" "text/plain"
+    "reb" "text/plain"
 ]
 error-template: trim/auto copy {
     <html><head><title>$code $text</title></head><body><h1>$text</h1>
@@ -39,12 +67,26 @@ send-chunk: func [port] [
     unless empty? port/locals [write port take/part port/locals 32'000]
 ]
 
-handle-request: func [config req /local uri type file data ext] [
-    parse to-string req ["get " ["/ " | copy uri to " "]]
+handle-request: function [config req] [
+    parse to-string req [copy method: "get" " " ["/ " | copy uri to " "]]
     uri: default ["index.html"]
-    parse uri [some [thru "."] copy ext: to end (type: select mime-map ext)]
+    either query: find uri "?" [
+        path: copy/part uri query
+        query: next query
+    ][
+        path: copy uri
+    ]
+    split-path: split path "/"
+    parse last split-path [some [thru "."] copy ext: to end (probe type: select mime-map ext)]
+
     type: default ["application/octet-stream"]
-    if not exists? file: config/root/:uri [return error-response 404 uri]
+    if verbose [
+        print spaced ["======^/action:" method uri]
+        print spaced ["path:  " path]
+        print spaced ["query: " query]
+        print spaced ["type:  " type]
+    ]
+    if not exists? file: config/root/:path [return error-response 404 uri]
     if error? try [data: read file] [return error-response 400 uri]
     reduce [200 type data]
 ]
@@ -56,6 +98,7 @@ awake-client: func [event /local port res] [
             either find port/data crlf2bin [
                 res: handle-request port/locals/config port/data
                 if trap? [start-response port res][
+                    print "READ ERROR"
                     close port
                 ]
             ] [
@@ -67,6 +110,7 @@ awake-client: func [event /local port res] [
                 close port
             ][
                 if trap? [send-chunk port][
+                    print "WRITE ERROR"
                     close port
                 ]
             ]
@@ -87,8 +131,14 @@ serve: func [web-port web-root /local listen-port] [
     listen-port: open rejoin [tcp://: web-port]
     listen-port/locals: make object! compose/deep [config: [root: (web-root)]]
     listen-port/awake: :awake-server
-    print ajoin ["serving on port " web-port "..."]
+    if verbose [print spaced [
+        "Serving on port" web-port "with root" web-root "..."
+    ]]
     wait listen-port
 ]
 
-serve 8000 system/options/path
+;; START
+
+serve port root
+
+;; vim: set sw=4 sts=-1 expandtab:
