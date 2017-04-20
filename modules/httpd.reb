@@ -116,7 +116,7 @@ sys/make-scheme [
         oauth: target: binary: content: length: timeout: _
         type: 'application/x-www-form-urlencoded
         server-software: rejoin [
-;            system/script/header/title " v" system/script/header/version " "
+;           system/script/header/title " v" system/script/header/version " "
             "Rebol/" system/product " v" system/version
         ]
         server-name: gateway-interface: _
@@ -151,18 +151,20 @@ sys/make-scheme [
 
                     either find client/data #{0D0A0D0A} [
                         transcribe client
-                        dispatch client
+                        if trap? [dispatch client][
+                            client/locals/response/kill?: true
+                            close client
+                            stop client/locals/parent
+                        ]
                     ][
                         read client
                     ]
                 ]
-
                 wrote [
-                    unless send-chunk client [
-                        if client/locals/response/kill? [
-                            close client
-                            stop client/locals/parent
-                        ]
+                    if trap? [send-chunk client] [
+                        client/locals/response/kill?: true
+                        close client
+                        stop client/locals/parent                        
                     ]
                     client
                 ]
