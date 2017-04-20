@@ -151,20 +151,17 @@ sys/make-scheme [
 
                     either find client/data #{0D0A0D0A} [
                         transcribe client
-                        if trap? [dispatch client][
-                            client/locals/response/kill?: true
-                            close client
-                            stop client/locals/parent
-                        ]
+                        dispatch client
                     ][
                         read client
                     ]
                 ]
                 wrote [
-                    if trap? [send-chunk client] [
-                        client/locals/response/kill?: true
-                        close client
-                        stop client/locals/parent                        
+                    unless send-chunk client [
+                        if client/locals/response/kill? [
+                            close client
+                            stop client/locals/parent
+                        ]
                     ]
                     client
                 ]
@@ -317,12 +314,22 @@ sys/make-scheme [
         ]
     ]
 
-    send-chunk: func [port [port!]][
+    send-chunk: function [port [port!]][
            ;; Trying to send data >32'000 bytes at once will trigger R3's internal
            ;; chunking (which is buggy, see above). So we cannot use chunks >32'000
            ;; for our manual chunking.
         either empty? port/locals/wire [_][
-            write port take/part port/locals/wire 32'000
+            if error? err: trap [
+                    write port take/part port/locals/wire 32'000
+            ][
+                probe err
+                ;; only mask some errors:
+                unless all [
+                    err/code = 5020
+                    err/id = 'write-error
+                    find [32 104] err/arg2
+                ] [fail err]
+            ]
         ]
     ]
 ]
