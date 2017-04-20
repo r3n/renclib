@@ -315,12 +315,15 @@ sys/make-scheme [
     ]
 
     send-chunk: function [port [port!]][
-           ;; Trying to send data >32'000 bytes at once will trigger R3's internal
-           ;; chunking (which is buggy, see above). So we cannot use chunks >32'000
+           ;; Trying to send data > 32'000 bytes at once will trigger R3's internal
+           ;; chunking (which is buggy, see above). So we cannot use chunks > 32'000
            ;; for our manual chunking.
+           ;;
+           ;; But let increase chunk size
+           ;; to see if that bug exists again!
         either empty? port/locals/wire [_][
             if error? err: trap [
-                    write port take/part port/locals/wire 32'000
+                    write port take/part port/locals/wire 2'000'000'000
             ][
                 probe err
                 ;; only mask some errors:
