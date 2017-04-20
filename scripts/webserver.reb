@@ -7,10 +7,12 @@ do spaced system/options/args
 
 ;; LIBS 
 import 'httpd
-import 'android
-rem: import 'rem
-html: import 'html
-rem-to-html: chain [:rem/load-rem :html/mold-html]
+
+rem-to-html: attempt [
+  rem: import 'rem
+  html: import 'html
+  chain [:rem/load-rem :html/mold-html]
+]
 
 ext-map: make block! [
   "css" css
@@ -83,7 +85,7 @@ handle-request: function [
   pos: find/last last path-elements "."
   file-ext: either pos [copy next pos] [_]
   mimetype: ext-map/:file-ext
-  either parse req/request-uri ["/http" opt "s" "://"to end] [
+  either parse req/request-uri ["/http" opt "s" "://" to end] [
     path: to-url req/request-uri: next req/request-uri
     filetype: 'file
     ; host: path-elements/3
@@ -111,14 +113,21 @@ handle-request: function [
   if filetype = 'file [
     if error? data: trap [read path] [return 403
 ]
-    if any [ mimetype = 'rem all [
-      mimetype = 'html 
-      "REBOL" = uppercase to-string copy/part data 5
-    ] ] [
+    if all [
+      function? :rem-to-html
+      any [
+        mimetype = 'rem
+        all [
+          mimetype = 'html 
+          "REBOL" = uppercase to-string copy/part data 5
+        ]
+      ]
+    ][
       either error? data: trap [
         rem-to-html load data
-      ] [data: form data mimetype: 'text]
-      [mimetype: 'html]
+      ]
+      [ data: form data mimetype: 'text ]
+      [ mimetype: 'html ]
     ]
     if mimetype = 'rebol [
       mimetype: 'html
