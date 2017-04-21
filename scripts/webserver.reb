@@ -70,7 +70,7 @@ html-list-dir: function [
   </head>}
   for-each i list [
     append data ajoin [
-      {<a href="} join-of dir i {">}
+      {<a href="} i {">}
       if dir? i ["&gt; "]
       i </a> <br/>
     ]
