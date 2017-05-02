@@ -1,5 +1,6 @@
 [
     <amazon-s3> [http://reb4.me/r3/s3.reb]
+    <detab-file> [https://raw.githubusercontent.com/r3n/renclib/master/scripts/detab-file]
     <html> [https://raw.githubusercontent.com/r3n/giuliolunati.renclib/master/usr/lib/r3/html.reb]
     <httpd> [https://raw.githubusercontent.com/r3n/renclib/master/modules/httpd.reb]
     <json> [https://raw.githubusercontent.com/r3n/renclib/master/modules/json.reb]
