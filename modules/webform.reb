@@ -3,7 +3,7 @@ Rebol [
     Author: "Christopher Ross-Gill"
     Date: 6-Sep-2015
     Home: http://www.ross-gill.com/page/Web_Forms_and_REBOL
-    File: %altwebform.r
+    File: %webform.r
     Version: 0.10.2
     Purpose: "Convert a Rebol block to a URL-Encoded Web Form string"
     Rights: http://opensource.org/licenses/Apache-2.0
