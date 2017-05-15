@@ -4,7 +4,7 @@ Rebol [
     Date: 6-Sep-2015
     Home: http://www.ross-gill.com/page/Web_Forms_and_REBOL
     File: %webform.r
-    Version: 0.10.2
+    Version: 0.10.3
     Purpose: "Convert a Rebol block to a URL-Encoded Web Form string"
     Rights: http://opensource.org/licenses/Apache-2.0
     Type: module
@@ -19,7 +19,7 @@ Rebol [
         18-Nov-2009  0.1.0 "Original Version"
     ]
     Example: [
-        "a=3&aa.a=1&b.c=1&b.c=2"
+        load-webform "a=3&aa.a=1&b.c=1&b.c=2"
         [a "3" aa [a "1"] b [c ["1" "2"]]]
     ]
 ]
@@ -98,7 +98,7 @@ load-webform: use [result path string pair as-path term][
                 name: as-path name
                 value: url-decode value
 
-                until [
+                loop-until [
                     tree: any [
                         find/tail tree name/1
                         insert tail tree name/1
@@ -106,7 +106,7 @@ load-webform: use [result path string pair as-path term][
 
                     name: next name
 
-                    switch type?/word tree/1 [
+                    switch to word! type-of pick tree 1 [
                         blank! [unless tail? name [insert/only tree tree: copy []]]
                         string! [change/only tree tree: reduce [tree/1]]
                         block! [tree: tree/1]
@@ -152,7 +152,7 @@ to-webform: use [
     reference: [
         some [
             here: get-word!
-            (change/only here attempt [get/any here/1])
+            (change/only here attempt [get/opt here/1])
             | skip
         ]
     ]
