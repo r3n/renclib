@@ -49,7 +49,7 @@ decode-xml: use [nm hx ns entity char][
 				  #"x" copy char 2 4 hx ";" (char: to-integer to-issue char)
 				| copy char 2 5 nm ";" (char: to-integer char)
 			]
-			| copy char word ";" (char: any [ns/:char 63])
+			| copy char word ";" (char: any [pick ns :char 63])
 		] (char: to-char char)
 	]
 
