@@ -26,7 +26,7 @@ discourse-post-url: rejoin [
 ]
 root: http://metaeducation.s3.amazonaws.com/travis-builds/
 
-topid_id: 54
+topic_id: 54
 category: 6
 
 ; get all the unique commit values still available for download
