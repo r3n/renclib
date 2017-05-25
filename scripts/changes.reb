@@ -1,8 +1,12 @@
 rebol [
     file: %changes.reb
-    notes: {to find the discourse post that contains a given hash in the change=log topic}
+    notes: {to find the discourse post that contains a given hash in the change-log topic 54}
     date: 26-May-2017
     author: "Graham"
+    notes: {
+        changes rebol/commit 
+        changes/limit rebol/commit 20
+    }
 ]
 
 changes*: function [
@@ -37,8 +41,13 @@ changes*: function [
     return "Commit not found.  Expand limit"
 ]
 
-reb-changes: func [hash][
-    changes* http://rebolchat.me/t/ 54 hash 10
+changes: func [
+    {browse to rebolchat.me change-log for hash}
+    hash
+    /limit n
+][
+    n: default 10
+    changes* http://rebolchat.me/t/ 54 hash n
 ]
 
-reb-changes rebol/commit
+; changes rebol/commit
