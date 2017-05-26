@@ -9,7 +9,7 @@ rebol [
     }
 ]
 
-changes*: function [
+changelog-at*: function [
     {browse to specific post by hash where search is limited to limit posts}
     discourse [url!] topic_id [integer!] hash [string!] limit [integer!]
 ][
@@ -41,13 +41,11 @@ changes*: function [
     return "Commit not found.  Expand limit"
 ]
 
-changes: func [
+changelog-at: func [
     {browse to rebolchat.me change-log for hash}
     hash
     /limit n
 ][
     n: default 10
-    changes* http://rebolchat.me/t/ 54 hash n
+    changelog-at* http://rebolchat.me/t/ 54 hash n
 ]
-
-; changes rebol/commit
