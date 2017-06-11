@@ -47,5 +47,5 @@ changelog-at: func [
     /limit n
 ][
     n: default 10
-    changelog-at* http://rebolchat.me/t/ 54 hash n
+    changelog-at* https://forum.rebol.info/t/ 54 hash n
 ]
