@@ -3,6 +3,7 @@
     <dl-renc> [https://raw.githubusercontent.com/gchiu/Rebol3/master/scripts/dl-renc.reb]
     <html> [https://raw.githubusercontent.com/r3n/giuliolunati.renclib/master/usr/lib/r3/html.reb]
     <httpd> [https://raw.githubusercontent.com/r3n/renclib/master/modules/httpd.reb]
+    <modflick> [https://raw.githubusercontent.com/gchiu/Rebol3/master/scripts/modflick.reb]
     <json> [https://raw.githubusercontent.com/r3n/renclib/master/modules/json.reb]
     <mysql> [https://raw.githubusercontent.com/zsx/mysql-r3/ren-c/mysql-protocol-pre.r]
     <pop3> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-pop3.reb]
