@@ -1,5 +1,6 @@
 [
     <amazon-s3> [http://reb4.me/r3/s3.reb]
+    <curl> [https://raw.githubusercontent.com/rgchris/Scripts/master/experimental/curl.reb]
     <dl-renc> [https://raw.githubusercontent.com/gchiu/Rebol3/master/scripts/dl-renc.reb]
     <html> [https://raw.githubusercontent.com/r3n/giuliolunati.renclib/master/usr/lib/r3/html.reb]
     <httpd> [https://raw.githubusercontent.com/r3n/renclib/master/modules/httpd.reb]
