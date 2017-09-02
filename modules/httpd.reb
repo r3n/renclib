@@ -212,8 +212,7 @@ sys/make-scheme [
         header-prototype: context [
             Accept: "*/*"
             Connection: "close"
-            User-Agent: rejoin ["Rebol/" system/product " " system/version]
-            Content-Length: Content-Type: Authorization: Range: _
+			User-Agent: Content-Length: Content-Type: Authorization: Range: Referer: _
         ]
 
         transcribe: func [
