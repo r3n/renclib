@@ -11,6 +11,7 @@
     <pop3> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-pop3.reb]
     <rebmu> [https://raw.githubusercontent.com/hostilefork/rebmu/master/rebmu.reb]
     <rem> [https://raw.githubusercontent.com/r3n/giuliolunati.renclib/master/usr/lib/r3/rem.reb]
+    <rest> [https://raw.githubusercontent.com/rgchris/Scripts/master/experimental/rest.reb]
     <rsp> [https://raw.githubusercontent.com/rgchris/Scripts/master/ren-c/rsp.reb]
     <send> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-send.reb]
     <smtp> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-smtp.reb]
