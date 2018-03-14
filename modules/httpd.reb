@@ -1,21 +1,27 @@
 Rebol [
     Title: "Web Server Scheme for Ren-C"
     Author: "Christopher Ross-Gill"
-    Date: 23-Feb-2017
+    Date: 11-Mar-2018
     File: %httpd.reb
-    Version: 0.3.0
+    Home: https://github.com/rgchris/Scripts
+    Version: 0.3.2
     Purpose: "An elementary Web Server scheme for creating fast prototypes"
     Rights: http://opensource.org/licenses/Apache-2.0
     Type: module
-    Name: httpd
+    Name: rgchris.httpd
     History: [
+        14-Mar-2018 0.3.2 "Closes connections (TODO: support Keep-Alive)"
+        11-Mar-2018 0.3.1 "Reworked to support KILL?"
         23-Feb-2017 0.3.0 "Adapted from Rebol 2"
         06-Feb-2017 0.2.0 "Include HTTP Parser/Dispatcher"
         12-Jan-2017 0.1.0 "Original Version"
     ]
 ]
 
-net-utils: reduce ['net-log _]
+net-utils: reduce [
+    ; 'net-log proc [message [block! string!]][print block? message then [unspaced message] else [message]]
+    'net-log _
+]
 
 as-string: func [binary [binary!] /local mark][
     mark: binary
@@ -29,22 +35,81 @@ sys/make-scheme [
     title: "HTTP Server"
     name: 'httpd
 
-    spec: make system/standard/port-spec-head [port-id: does: _]
+    spec: make system/standard/port-spec-head [port-id: actions: _]
 
-    default-response: [probe request/action]
+    wake-client: func [event [event!] /local client request response this][
+        client: event/port
 
-    init: func [server [port!] /local spec port-id does][
+        switch event/type [
+            read [
+                net-utils/net-log ["Instance [" client/locals/instance: me + 1 "]"]
+
+                case [
+                    not client/locals/parent/locals/open? [
+                        close client
+                        client/locals/parent
+                    ]
+
+                    find client/data #{0D0A0D0A} [
+                        transcribe client
+                        dispatch client
+                    ]
+
+                    true [
+                        read client
+                    ]
+                ]
+
+                client
+            ]
+
+            wrote [
+                case [
+                    send-chunk client [
+                        client
+                    ]
+
+                    client/locals/response/kill? [
+                        close client
+                        wake-up client/locals/parent make event! [
+                            type: 'close
+                            port: client/locals/parent
+                        ]
+                    ]
+
+                    client/locals/response/close? [
+                        close client
+                    ]
+
+                    true [
+                        client
+                    ]
+                ]
+            ]
+
+            close [
+                close client
+            ]
+
+            (
+                net-utils/net-log ["Unexpected Client Event: " uppercase form event/type]
+                client
+            )
+        ]
+    ]
+
+    init: func [server [port!] /local spec][
         spec: server/spec
 
         case [
             url? spec/ref []
-            block? spec/does []
+            block? spec/actions []
             parse spec/ref [
                 set-word! lit-word!
                 integer! block!
             ][
                 spec/port-id: spec/ref/3
-                spec/does: spec/ref/4
+                spec/actions: spec/ref/4
             ]
             /else [
                 do make error! "Server lacking core features."
@@ -52,71 +117,92 @@ sys/make-scheme [
         ]
 
         server/locals: make object! [
-            handler: subport: _
+            handler: subport: open?: _
+            clients: make block! 1024
         ]
 
         server/locals/handler: procedure [
             request [object!]
             response [object!]
-        ] case [
-            function? get in server 'awake [body-of get in server 'awake]
-            block? server/awake [server/awake]
-            block? server/spec/does [server/spec/does]
-            true [default-response]
+        ] compose [
+            render: get in response 'render
+            redirect: get in response 'redirect
+            print: get in response 'print
+
+            (
+                block? server/spec/actions
+                    then [server/spec/actions]
+                    else [default-response]
+            )
         ]
 
         server/locals/subport: make port! [scheme: 'tcp]
+
         server/locals/subport/spec/port-id: spec/port-id
+
         server/locals/subport/locals: make object! [
+            instance: 0
             request: response: _
             wire: make binary! 4096
             parent: :server
         ]
 
-        server/locals/subport/awake: func [event [event!] /local client server] compose [
-            ; server: (:server)
-            if event/type = 'accept [
-                client: first event/port
-                client/awake: :wake-client
-                read client
-            ]
+        server/locals/subport/awake: func [event [event!] /local client][
+            switch event/type [
+                accept [
+                    client: first event/port
+                    client/awake: :wake-client
+                    read client
+                    event
+                ]
 
-            ; event
-            false
+                (false)
+            ]
+        ]
+
+        server/awake: func [event [event!]][
+            switch event/type [
+                close [
+                    close event/port
+                    true
+                ]
+
+                (event/port)
+            ]
         ]
 
         server
     ]
 
-    start: func [port [port!]][
-        append system/ports/wait-list port
-    ]
-
-    stop: func [port [port!]][
-        remove find system/ports/wait-list port
-        close port
-    ]
-
     actor: [
         open: func [server [port!]][
-            ; print ["Server running on port:" server/spec/port-id]
-            start server/locals/subport
+            net-utils/net-log ["Server running on port no. " server/spec/port-id]
             open server/locals/subport
+            server/locals/open?: yes
+            server
         ]
 
         close: func [server [port!]][
-            stop server/locals/subport
+            server/awake: server/locals/subport/awake: _
+            server/locals/open?: no
+            close server/locals/subport
+            insert system/ports/system/data server
+            ; ^^^ would like to know why...
+            server
         ]
     ]
 
+    default-response: [probe request/action]
+
     request-prototype: make object! [
+        raw: _
         version: 1.1
         method: "GET"
         action: headers: http-headers: _
         oauth: target: binary: content: length: timeout: _
         type: 'application/x-www-form-urlencoded
-        server-software: rejoin [
-;           system/script/header/title " v" system/script/header/version " "
+        server-software: unspaced [
+;          system/script/header/title " v" system/script/header/version " "
             "Rebol/" system/product " v" system/version
         ]
         server-name: gateway-interface: _
@@ -136,39 +222,21 @@ sys/make-scheme [
         length: 0
         kill?: false
         close?: true
-    ]
 
-    wake-client: use [instance][
-        instance: 0
+        render: func [response [string! binary!]][
+            status: 200
+            content: response
+        ]
 
-        func [event [event!] /local client request response this][
-            client: event/port
+        print: func [response [string!]][
+            status: 200
+            content: response
+            type: "text/plain"
+        ]
 
-            switch/default event/type [
-                read [
-                    instance: me + 1
-                    ; print rejoin ["[" instance "]"]
-
-                    either find client/data #{0D0A0D0A} [
-                        transcribe client
-                        dispatch client
-                    ][
-                        read client
-                    ]
-                ]
-                wrote [
-                    unless send-chunk client [
-                        if client/locals/response/kill? [
-                            close client
-                            stop client/locals/parent
-                        ]
-                    ]
-                    client
-                ]
-                close [close client]
-            ][
-                ; probe event/type
-            ]
+        redirect: [target [url!] /as status [integer!]][
+            status: any [:status 301]
+            location: target
         ]
     ]
 
@@ -208,7 +276,7 @@ sys/make-scheme [
         header-prototype: context [
             Accept: "*/*"
             Connection: "close"
-			User-Agent: Content-Length: Content-Type: Authorization: Range: Referer: _
+            User-Agent: Content-Length: Content-Type: Authorization: Range: Referer: _
         ]
 
         transcribe: func [
@@ -216,7 +284,7 @@ sys/make-scheme [
             /local request name value pos
         ][
             client/locals/request: make request-prototype [
-                either parse client/data [
+                either parse raw: client/data [
                     copy method request-action space
                     copy request-uri [
                         copy target request-path opt [
@@ -252,7 +320,7 @@ sys/make-scheme [
                     server-port: query/mode client 'local-port
                     remote-addr: query/mode client 'remote-ip
 
-                    headers: make header-prototype http-headers: new-line/all/skip headers true 2
+                    headers: make header-prototype http-headers: new-line/skip headers true 2
 
                     type: if string? headers/Content-Type [
                         copy/part type: headers/Content-Type any [
@@ -275,7 +343,7 @@ sys/make-scheme [
         ]
     ]
 
-    dispatch: use [status-codes][
+    dispatch: use [status-codes build-header hdr][
         status-codes: [
             200 "OK" 201 "Created" 204 "No Content"
             301 "Moved Permanently" 302 "Moved temporarily" 303 "See Other" 307 "Temporary Redirect"
@@ -283,11 +351,8 @@ sys/make-scheme [
             500 "Internal Server Error" 503 "Service Unavailable"
         ]
 
-        func [client [port!] /local response continue?][
-            ; probe client/locals/wire
-            client/locals/response: response: make response-prototype []
-            client/locals/parent/locals/handler client/locals/request response
-            write client append make binary! 0 collect [
+        build-header: func [response [object!]][
+            append make binary! 1024 spaced collect [
                 case/all [
                     not find status-codes response/status [
                         response/status: 500
@@ -300,13 +365,35 @@ sys/make-scheme [
                     ]
                 ]
 
-                keep reform ["HTTP/1.0" response/status select status-codes response/status]
-                keep reform ["^/Content-Type:" response/type]
-                keep reform ["^/Content-Length:" length? response/content]
-                if response/location [
-                    keep reform ["^/Location:" response/location]
+                keep ["HTTP/1.1" response/status select status-codes response/status]
+                keep [cr lf "Content-Type:" response/type]
+                keep [cr lf "Content-Length:" length-of response/content]
+                if response/close? [
+                    keep [cr lf "Connection:" "close"]
                 ]
-                keep "^/^/"
+                if response/location [
+                    keep [cr lf "Location:" response/location]
+                ]
+                keep [cr lf cr lf]
+            ]
+        ]
+
+        function [client [port!]][
+            client/locals/response: response: make response-prototype []
+            client/locals/parent/locals/handler client/locals/request response
+
+            case [
+                error? outcome: trap [write client hdr: build-header response][
+                    either all [
+                        outcome/code = 5020
+                        outcome/id = 'write-error
+                        find [32 104] outcome/arg2
+                    ][
+                        net-utils/net-log ["Response headers not sent to client: reason #" outcome/arg2]
+                    ][
+                        fail :outcome
+                    ]
+                ]
             ]
 
             insert client/locals/wire response/content
@@ -314,24 +401,35 @@ sys/make-scheme [
     ]
 
     send-chunk: function [port [port!]][
-           ;; Trying to send data > 32'000 bytes at once will trigger R3's internal
-           ;; chunking (which is buggy, see above). So we cannot use chunks > 32'000
-           ;; for our manual chunking.
-           ;;
-           ;; But let increase chunk size
-           ;; to see if that bug exists again!
-        either empty? port/locals/wire [_][
-            if error? err: trap [
-                    write port take/part port/locals/wire 2'000'000'000
+        ;; Trying to send data > 32'000 bytes at once will trigger R3's internal
+        ;; chunking (which is buggy, see above). So we cannot use chunks > 32'000
+        ;; for our manual chunking.
+        ;;
+        ;; But let increase chunk size
+        ;; to see if that bug exists again!
+        case [
+            empty? port/locals/wire [_]
+
+            error? outcome: trap [
+                write port take/part port/locals/wire 32'000 ; 2'000'000
             ][
-                probe err
                 ;; only mask some errors:
-                unless all [
-                    err/code = 5020
-                    err/id = 'write-error
-                    find [32 104] err/arg2
-                ] [fail err]
+                all [
+                    outcome/code = 5020
+                    outcome/id = 'write-error
+                    find [32 104] outcome/arg2
+                ]
+                then [
+                    net-utils/net-log ["Part or whole of response not sent to client: reason #" outcome/arg2]
+                    clear port/locals/wire
+                    _
+                ]
+                else [
+                    fail :outcome
+                ]
             ]
+
+            true [:outcome] ; is port
         ]
     ]
 ]
