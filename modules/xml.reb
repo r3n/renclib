@@ -524,7 +524,7 @@ load-xml: use [
 
 		text: use [this char value][
 			; intersect charset ["^-^/^M" #" " - #"^(FF)"] complement charset [#"^(00)" - #"^(20)" "&<"]
-			char: charset ["^-^/^M" #"^(20)" - #"^(25)" #"^(27)" - #"^(3B)" #"^(3D)" - #"^(FFFF)"] ; "
+			char: charset ["^-^/^M" #"^(20)" - #"^(25)" #"^(27)" - #"^(3B)" #"^(3D)" - #"^(FFFE)" #"^(FFFF)"] ; temp hack (... - #"^(FFFF)" hangs)
 			[	copy value [
 					opt space [char | entity]
 					any [char | entity | space]
