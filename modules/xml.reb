@@ -54,7 +54,7 @@ decode-xml: use [nm hx ns entity char][
 		] (char: to-char char)
 	]
 
-	func [text [string! blank!]][
+	func [text [text! blank!]][
 		either text [
 			if parse text [any [remove entity insert char | skip]][text]
 		][copy ""]
@@ -143,8 +143,8 @@ load-xml: use [
 				item/parent/last: item/back
 			]
 
-			also either back [item/back][item/next]
-			item/parent: item/back: item/next: _ ; in case references are still held elsewhere
+			either back [item/back][item/next]
+			elide item/parent: item/back: item/next: _ ; in case references are still held elsewhere
 		]
 
 		clear: func [list [block! map!]][
@@ -152,8 +152,8 @@ load-xml: use [
 		]
 
 		clear-from: func [item [block! map!]][
-			also item/back
-			loop-until [not item: remove item]
+			item/back
+			elide loop-until [not item: remove item]
 		]
 	]
 
@@ -163,7 +163,7 @@ load-xml: use [
 				['type 'element 'name tag]
 			]
 			tag? tag [
-				['type 'element 'name to word! to string! tag]
+				['type 'element 'name to word! to text! tag]
 			]
 			issue? tag [
 				['type 'attribute 'name to word! tag]
@@ -179,7 +179,7 @@ load-xml: use [
 		]
 
 		walk: func [callback [block!] /into child [block! map!] /only][
-			also _ use [node] compose/deep [
+			use [node] compose/deep [
 				node: any [:child tree/first]
 				while [node][
 					(callback) |
@@ -189,6 +189,7 @@ load-xml: use [
 					node: node/next
 				]
 			]
+      _
 		]
 
 		attributes: does [
@@ -226,9 +227,9 @@ load-xml: use [
 			]
 		]
 
-		get-by-id: func [id [issue! string!] /local rule at hit][
+		get-by-id: func [id [issue! text!] /local rule at hit][
 			any [
-				string? id
+				text? id
 				id: remove mold id
 			]
 
@@ -396,11 +397,11 @@ load-xml: use [
 		as-block: use [form-node][
 			form-node: func [node [block! map!]][
 				new-line/all/skip collect [
-					keep switch/default node/type [
-						element [to tag! node/name]
-						attribute [to issue! node/name]
-						text [%.txt]
-					][
+					keep switch node/type [
+						'element [to tag! node/name]
+						'attribute [to issue! node/name]
+						'text [%.txt]
+					] else [
 						node/name
 					]
 
@@ -440,7 +441,7 @@ load-xml: use [
 
 			form-node: func [node [block! map!] /child][
 				switch node/type [
-					element [
+					'element [
 						emit ["<" enspace node/namespace form node/name]
 						either blank? node/first [
 							emit " />"
@@ -455,25 +456,26 @@ load-xml: use [
 						]
 					]
 
-					attribute [
+					'attribute [
 						emit [enspace node/namespace form node/name {="} encode form node/value {"}]
 						if all [child node/next][
 							emit either node/next/type = 'attribute [" "][">"]
 						]
 					]
 
-					text whitespace [
+					'text whitespace [
 						emit encode node/value
 					]
 
-					cdata [
+					'cdata [
 						emit [{<![CDATA[} node/value {]]>}]
 					]
 				]
 			]
 
 			does [
-				also xml: copy "" form-node tree
+				xml: copy ""
+        elide form-node tree
 			]
 		]
 	]
@@ -496,7 +498,7 @@ load-xml: use [
 			namespace: tree/namespace
 			value: tree/value
 			type: tree/type
-			document?: truthy? document
+			document?: to-logic document
 		]
 	]
 
@@ -622,7 +624,7 @@ load-xml: use [
 	][
 		case/all [
 			any [file? source url? source][source: read source]
-			binary? source [source: to string! source]
+			binary? source [source: to text! source]
 		]
 
 		root: node: trees/new
