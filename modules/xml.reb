@@ -3,14 +3,15 @@ Rebol [
 	Author: "Christopher Ross-Gill"
 	Date: 9-Jul-2017
 	Home: http://www.ross-gill.com/page/XML_and_Rebol
-	File: %altxml.reb
-	Version: 0.5.0
+	File: %xml.reb
+	Version: 0.5.1
 	Purpose: "XML Functions for Ren-C"
 	Rights: http://opensource.org/licenses/Apache-2.0
 	Type: module
-	Name: rgchris.altxml
+	Name: xml
 	Exports: [load-xml decode-xml]
 	History: [
+    01-Jul-2018 0.5.1 "Updated to build e560322 (@giuliolunati)"
 		09-Jul-2017 0.5.0 "Use linked lists for document model"
 		02-Apr-2017 0.4.1 "Ported to Ren-C" 
 		07-Apr-2014 0.4.1 "Fixed loop when handling unterminated empty tags"

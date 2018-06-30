@@ -22,5 +22,5 @@
     <webform> [https://raw.githubusercontent.com/rgchris/Scripts/master/ren-c/altwebform.reb]
     <webserver> [https://raw.githubusercontent.com/r3n/renclib/master/outdated/utils/webserver.reb]
     <wordify> [https://raw.githubusercontent.com/rgchris/Scripts/master/ren-c/wordify.reb]
-    <xml> [https://raw.githubusercontent.com/r3n/renclib/master/outdated/modules/xml.reb]
+    <xml> [https://raw.githubusercontent.com/r3n/renclib/master/modules/xml.reb]
 ]
