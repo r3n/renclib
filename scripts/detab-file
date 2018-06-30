@@ -1,8 +1,0 @@
-rebol []
-
-detab-file: procedure [
-    "detabs a disk file"
-    filename [file!]
-][
-    write filename detab to string! read filename
-]
