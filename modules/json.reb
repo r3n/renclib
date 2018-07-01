@@ -11,6 +11,7 @@ Rebol [
 	Name: json
 	Exports: [load-json to-json]
 	History: [
+    01-Jul-2018 0.3.6.2 "Updated to snapshot build e560322"
 		25-Feb-2017 0.3.6.1 "Ren-C Compatibilities"
 		18-Sep-2015 0.3.6 "Non-Word keys loaded as strings"
 		17-Sep-2015 0.3.5 "Added GET-PATH! lookup"
@@ -25,7 +26,7 @@ Rebol [
 		07-Jul-2014 0.3.0 "Initial support for JSONP"
 		15-Jul-2011 0.2.6 "Flattens Flickr '_content' objects"
 		02-Dec-2010 0.2.5 "Support for time! added"
-		28-Aug-2010 0.2.4 "Encodes tag! any-type! paired blocks as an object"
+		28-Aug-2010 0.2.4 "Encodes tag! any-value! paired blocks as an object"
 		06-Aug-2010 0.2.2 "Issue! composed of digits encoded as integers"
 		22-May-2005 0.1.0 "Original Version"
 	]
@@ -68,7 +69,7 @@ load-json: use [
 			#"^(f900)" - #"^(FDCF)" #"^(FDF0)" - #"^(FFFD)"
 		]
 
-		func [val [string!]][
+		func [val [text!]][
 			all [
 				parse val [word1 any word+]
 				to word! val
@@ -88,10 +89,10 @@ load-json: use [
 		ex: [[#"e" | #"E"] opt [#"+" | #"-"] some dg]
 		nm: [opt #"-" some dg opt [#"." some dg] opt ex]
 
-		as-num: func [val [string!]][
+		as-num: func [val [text!]][
 			case [
 				not parse val [opt "-" some dg][to decimal! val]
-				not integer? try [val: to integer! val][to issue! val]
+				not integer? trap [val: to integer! val][to issue! val]
 				val [val]
 			]
 		]
@@ -117,8 +118,8 @@ load-json: use [
 				] :mk
 			]
 
-			func [text [string! blank!]][
-				either blank? text [make string! 0][
+			func [text [text! blank!]][
+				either blank? text [make text! 0][
 					all [parse text [any [to "\" escape] to end] text]
 				]
 			]
@@ -149,7 +150,7 @@ load-json: use [
 			)
 		]
 		list: [space opt [name value any [comma name value]] space]
-		as-map: [(unless is-flat [here: change back here make map! pick back here 1])]
+		as-map: [(if not is-flat [here: change back here make map! pick back here 1])]
 
 		[#"{" new-child list #"}" neaten/2 to-parent as-map]
 	]
@@ -173,17 +174,17 @@ load-json: use [
 
 	func [
 		"Convert a JSON string to Rebol data"
-		json [string! binary! file! url!] "JSON string"
+		json [text! binary! file! url!] "JSON string"
 		/flat "Objects are imported as tag-value pairs"
 		/padded "Loads JSON data wrapped in a JSONP envelope"
 	][
 		case/all [
 			any [file? json url? json][
-				if error? json: try [read/string (json)][
+				if error? json: trap [read/string (json)][
 					do :json
 				]
 			]
-			binary? json [json: to string! json]
+			binary? json [json: to text! json]
 		]
 
 		is-flat: :flat
@@ -233,7 +234,7 @@ to-json: use [
 	]
 
 	emit-date: use [pad second][
-		pad: func [part length][part: to string! part head insert/dup part "0" length - length? part]
+		pad: func [part length][part: to text! part head insert/dup part "0" length - length? part]
 
 		quote (
 			emits rejoin collect [
@@ -243,7 +244,7 @@ to-json: use [
 					keep either integer? here/1/second [
 						pad here/1/second 2
 					][
-						second: split to string! here/1/second "."
+						second: split to text! here/1/second "."
 						reduce [pad second/1 2 "." second/2]
 					]
 					keep either any [
@@ -281,7 +282,7 @@ to-json: use [
 		(emit "{")
 		any [
 			here: [set-word! (change here to word! here/1) | any-string! | any-word!]
-			(emit [{"} escape to string! here/1 {":}])
+			(emit [{"} escape to text! here/1 {":}])
 			here: value here: comma
 		]
 		(emit "}")
@@ -289,8 +290,8 @@ to-json: use [
 
 	value: [
 		  lookup ; resolve a GET-WORD! reference
-		| number! (emit here/1)
-		| [logic! | 'true | 'false] (emit to string! here/1)
+		| any-number! (emit here/1)
+		| [logic! | 'true | 'false] (emit to text! here/1)
 		| [blank! | 'none | 'blank] (emit quote 'null)
 		| date! emit-date
 		| issue! emit-issue
@@ -301,13 +302,13 @@ to-json: use [
 
 		| [object! | map!] :here (change/only here body-of first here) into object
 		| into block-of-pairs :here (change/only here copy first here) into object
-		| any-block! :here (change/only here copy first here) into block
+		| any-array! :here (change/only here copy first here) into block
 
-		| any-type! (emits to tag! type-of first here)
+		| any-value! (emits to tag! type-of first here)
 	]
 
 	func [data][
-		json: make string! 1024
+		json: make text! 1024
 		if parse compose/only [(data)][here: value][json]
 	]
 ]

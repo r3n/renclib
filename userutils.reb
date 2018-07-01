@@ -4,7 +4,7 @@
     <dl-renc> [https://raw.githubusercontent.com/gchiu/Rebol3/master/scripts/dl-renc.reb]
     <html> [https://raw.githubusercontent.com/r3n/giuliolunati.renclib/master/usr/lib/r3/html.reb]
     <httpd> [https://raw.githubusercontent.com/r3n/renclib/master/outdated/modules/httpd.reb]
-    <json> [https://raw.githubusercontent.com/r3n/renclib/master/outdated/modules/json.reb]
+    <json> [https://raw.githubusercontent.com/r3n/renclib/master/modules/json.reb]
     <mysql> [https://raw.githubusercontent.com/zsx/mysql-r3/ren-c/mysql-protocol-pre.r]
     <rebmu> [https://raw.githubusercontent.com/hostilefork/rebmu/master/rebmu.reb]
     <rem> [https://raw.githubusercontent.com/r3n/giuliolunati.renclib/master/usr/lib/r3/rem.reb]
