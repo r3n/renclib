@@ -30,10 +30,10 @@ topic_id: 54
 category: 6
 
 ; get all the unique commit values still available for download
-dom: load-xml/dom to string! read s3files
+dom: load-xml/dom to text! read s3files
 result: dom/get <Contents>
 
-compose-message: function [message [string!] date [date! string!]][
+compose-message: function [message [text!] date [date! text!]][
     dump date
     dump message
     if date? date [
@@ -56,8 +56,8 @@ files: copy []
 for-each [key value] result/position [
     ; r: copy value
     if parse value [
-        path! set keyvalue string!
-        path! set datestring string!
+        path! set keyvalue text!
+        path! set datestring text!
         to end
     ][
         if parse keyvalue ["travis-builds/" copy os: to "/" "/" copy filename to end][
@@ -81,9 +81,9 @@ operating-systems: [
 ] 
 
 ; now read the commits
-json: reverse load-json to-string read commits ;=> block
+json: reverse load-json to-text read commits ;=> block
 
-post-commit: function [content [string!] date][
+post-commit: function [content [text!] date][
     content: compose-message content date
     write discourse-post-url compose [headers POST [Content-Type: "application/json"] (content)]
 ]
@@ -122,7 +122,7 @@ for-each committed json [ ; map!
 }
         postcontent: reword content compose copy [1 (date) 2 (author) 3 (message) 4 (html_url)]
         current-os: copy ""
-        unless empty? binaries [
+        if not empty? binaries [
             append postcontent newline
             append postcontent "_The binaries below are only available for a couple of weeks or so after commit date._^/" 
             for-each [os file] binaries [
