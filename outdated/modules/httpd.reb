@@ -81,7 +81,7 @@ sys/make-scheme [
 
             'wrote [
                 case [
-                    send-chunk client [
+                    send-data client [
                         client
                     ]
 
@@ -444,56 +444,22 @@ sys/make-scheme [
             response/content: gzip response/content
         ]
 
-        if error? outcome: trap [write client hdr: build-header response] [
-            all [
-                outcome/code = 5020
-                outcome/id = 'write-error
-                find [32 104] outcome/arg2
-            ] then [
-                net-utils/net-log [
-                    "Response headers not sent to client:"
-                        "reason #" outcome/arg2
-                ]
-            ] else [
-                fail :outcome
-            ]
-        ]
+        if error? outcome: trap [write client hdr: build-header response] [fail :outcome]
 
         insert client/locals/wire response/content
     ]
 
-    send-chunk: function [
+    send-data: function [
         port [port!]
     ][
-        ;
-        ; !!! Trying to send data > 32'000 bytes at once would trigger R3's
-        ; internal chunking (which was buggy, see above).  Chunks > 32'000
-        ; bytes were thus manually chunked for some time, but it should be
-        ; increased to see if that bug still exists.
-        ;
         case [
             empty? port/locals/wire [_]
 
             error? outcome: trap [
-                write port take/part port/locals/wire 32'000 ; 2'000'000
+                write port port/locals/wire
+        clear port/locals/wire
             ][
-                ;; only mask some errors:
-                all [
-                    outcome/code = 5020
-                    outcome/id = 'write-error
-                    find [32 104] outcome/arg2
-                ]
-                then [
-                    net-utils/net-log [
-                        "Part or whole of response not sent to client:"
-                            "reason #" outcome/arg2
-                    ]
-                    clear port/locals/wire
-                    _
-                ]
-                else [
                     fail :outcome
-                ]
             ]
 
             default [:outcome] ; is port
