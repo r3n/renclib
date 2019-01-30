@@ -1,15 +1,17 @@
 Rebol [
     Title: "Web Server Scheme for Ren-C"
     Author: "Christopher Ross-Gill"
-    Date: 11-Mar-2018
+    Date: 14-Dec-2018
     File: %httpd.reb
     Home: https://github.com/rgchris/Scripts
-    Version: 0.3.3
+    Version: 0.3.5
     Purpose: "An elementary Web Server scheme for creating fast prototypes"
     Rights: http://opensource.org/licenses/Apache-2.0
     Type: module
-    Name: rgchris.httpd
+    Name: httpd
     History: [
+        02-Feb-2019 0.3.5 "File argument for REDIRECT permits relative redirections"
+        14-Dec-2018 0.3.4 "Add REFLECT handler (supports OPEN?); Redirect defaults to 303"
         16-Mar-2018 0.3.3 "Add COMPRESS? option"
         14-Mar-2018 0.3.2 "Closes connections (TODO: support Keep-Alive)"
         11-Mar-2018 0.3.1 "Reworked to support KILL?"
@@ -29,7 +31,7 @@ Rebol [
 net-utils: reduce [
     comment [
         'net-log proc [message [block! text!]] [
-            print <- either block? message [spaced message] [message]
+            print either block? message [spaced message] [message]
         ]
     ]
     'net-log _
@@ -196,6 +198,18 @@ sys/make-scheme [
             server
         ]
 
+        reflect: func [server [port!] property [word!]][
+            switch property [
+                'open? [
+                    server/locals/open?
+                ]
+
+                default [
+                    fail ["HTTPd port does not reflect this property:" uppercase mold property]
+                ]
+            ]
+        ]
+
         close: func [server [port!]] [
             server/awake: server/locals/subport/awake: _
             server/locals/open?: no
@@ -267,8 +281,10 @@ sys/make-scheme [
             type: "text/plain"
         ]
 
-        redirect: method [target [url!] /as status [integer!]] [
-            status: default [301] ; !!! initialized to 404, so never defaults?
+        redirect: method [target [url! file!] /as code [integer!]] [
+            status: code: default [303]
+            content: "Redirecting..."
+            type: "text/plain"
             location: target
         ]
     ]
@@ -287,7 +303,7 @@ sys/make-scheme [
 
         request-query (use [chars] [
             chars: complement charset [#"^@" - #" "]
-            [some chars]
+            [any chars] ;; I need empty request .../? [@giuliolunati]
         ])
 
         header-feed ([newline | cr lf])
@@ -370,7 +386,7 @@ sys/make-scheme [
             remote-addr: query/mode client 'remote-ip
 
             headers: make header-prototype
-                <- http-headers: new-line/skip headers true 2
+                http-headers: new-line/skip headers true 2
 
             type: try all [
                 text? type: headers/Content-Type
@@ -421,7 +437,7 @@ sys/make-scheme [
                 ]
 
                 keep ["HTTP/1.1" response/status
-                    <- select status-codes response/status]
+                    select status-codes response/status]
                 keep [cr lf "Content-Type:" response/type]
                 keep [cr lf "Content-Length:" length-of response/content]
                 if response/compress? [
@@ -433,18 +449,28 @@ sys/make-scheme [
                 if response/close? [
                     keep [cr lf "Connection:" "close"]
                 ]
+                keep [cr lf "Cache-Control:" "no-cache"]
                 keep [cr lf cr lf]
             ]
         ])
     ][
         client/locals/response: response: make response-prototype []
-        client/locals/parent/locals/handler client/locals/request response
+
+        if object? client/locals/request [
+            client/locals/parent/locals/handler client/locals/request response
+        ] else [ ;; don't crash on bad request
+            response/status: 500
+            response/type: "text/html"
+            response/content: "Bad request."
+        ]
 
         if response/compress? [
             response/content: gzip response/content
         ]
 
-        if error? outcome: trap [write client hdr: build-header response] [
+        if error? trap [
+            outcome: write client hdr: build-header response
+        ] [
             all [
                 outcome/code = 5020
                 outcome/id = 'write-error
@@ -474,8 +500,8 @@ sys/make-scheme [
         case [
             empty? port/locals/wire [_]
 
-            error? outcome: trap [
-                write port take/part port/locals/wire 32'000 ; 2'000'000
+            error? trap [
+                outcome: write port take/part port/locals/wire 32'000 ; 2'000'000
             ][
                 ;; only mask some errors:
                 all [
