@@ -12,7 +12,6 @@ EXAMPLE: 8080 /my/web/root -q -a index
 }]
 
 ;; INIT
-cd :system/options/path
 port: 8888
 root-dir: %"./"
 access-dir: false
@@ -20,7 +19,14 @@ verbose: 1
 
 a: system/options/args
 iterate a [case [
-    "-a" = a/1 [access-dir: a/2 a: next a]
+    "-a" = a/1 [
+      a: next a
+      ?? access-dir: case [
+        tail? a [true]
+        a/1 = "true" [true]
+        a/1 = "false" [false]
+      ] else [to-file a/1]
+    ]
     find ["-h" "-help" "--help"] a/1 [-help quit]
     "-q" = a/1 [verbose: 0]
     "-v" = a/1 [verbose: 2]
@@ -29,12 +35,14 @@ iterate a [case [
 ]]
 
 ;; LIBS
-
 import 'httpd
-rem: import 'rem
-to-html: import 'to-html
-rem-to-html: chain [:rem/load-rem :to-html/to-html]
+attempt [
+  rem: import 'rem
+  to-html: import 'to-html
+]
+?? rem-to-html: attempt[chain [:rem/load-rem :to-html/to-html]]
 
+cd :system/options/path
 ext-map: [
   "css" css
   "gif" gif
@@ -133,10 +141,12 @@ handle-request: function [
       ] 
       return 500
     ]
-    dir-index: map-each x [%.reb %.rem %.html %.htm] [join to-file access-dir x]
-    for-each x dir-index [
-      if 'file = try exists? join path x [dir-index: x break]
-    ] then [dir-index: "?"]
+    if file? access-dir [
+      dir-index: map-each x [%.reb %.rem %.html %.htm] [join to-file access-dir x]
+      for-each x dir-index [
+        if 'file = try exists? join path x [dir-index: x break]
+      ] then [dir-index: "?"]
+    ] else [dir-index: "?"]
     return redirect-response join request/target dir-index
   ]
   if path-type = 'file [
@@ -223,7 +233,7 @@ server: open compose [
 if verbose >= 1 [
   lib/print spaced ["Serving on port" port]
   lib/print spaced ["root-dir:" clean-path root-dir]
-  lib/print spaced ["access-dir:" access-dir]
+  lib/print spaced ["access-dir:" mold access-dir]
 ]
 
 wait server
