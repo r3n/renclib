@@ -92,7 +92,7 @@ load-json: use [
         as-num: func [val [text!]][
             case [
                 not parse val [opt "-" some dg][to decimal! val]
-                not integer? trap [val: to integer! val][to issue! val]
+                error? trap [val: to integer! val][to issue! val]
                 val [val]
             ]
         ]
@@ -180,7 +180,7 @@ load-json: use [
     ][
         case/all [
             any [file? json url? json][
-                if error? json: trap [read/string (json)][
+                if error? trap [json: read/string (json)][
                     do :json
                 ]
             ]
@@ -236,7 +236,7 @@ to-json: use [
     emit-date: use [pad second][
         pad: func [part length][part: to text! part head insert/dup part "0" length - length? part]
 
-        quote (
+        lit (
             emits rejoin collect [
                 keep reduce [pad here/1/year 4 "-" pad here/1/month 2 "-" pad here/1/day 2]
                 if here/1/time [
@@ -292,7 +292,7 @@ to-json: use [
           lookup ; resolve a GET-WORD! reference
         | any-number! (emit here/1)
         | [logic! | 'true | 'false] (emit to text! here/1)
-        | [blank! | 'none | 'blank] (emit quote 'null)
+        | [blank! | 'none | 'blank] (emit lit 'null)
         | date! emit-date
         | issue! emit-issue
         | [
