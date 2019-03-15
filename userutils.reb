@@ -6,6 +6,7 @@
     <httpd> [https://raw.githubusercontent.com/r3n/renclib/master/outdated/modules/httpd.reb]
     <json> [https://raw.githubusercontent.com/r3n/renclib/master/modules/json.reb]
     <mysql> [https://raw.githubusercontent.com/zsx/mysql-r3/ren-c/mysql-protocol-pre.r]
+    <nzpower> [https://gitlab.com/Zhaoshirong/nzpower/raw/master/nzpower.reb]
     <rebmu> [https://raw.githubusercontent.com/hostilefork/rebmu/master/rebmu.reb]
     <rem> [https://raw.githubusercontent.com/r3n/giuliolunati.renclib/master/usr/lib/r3/rem.reb]
     <send> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-send.reb]
@@ -17,4 +18,5 @@
     <webform> [https://raw.githubusercontent.com/r3n/renclib/master/modules/webform.reb]
     <webserver> [https://raw.githubusercontent.com/r3n/renclib/master/outdated/utils/webserver.reb]
     <xml> [https://raw.githubusercontent.com/r3n/renclib/master/modules/xml.reb]
+    
 ]            
