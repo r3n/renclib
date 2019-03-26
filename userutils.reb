@@ -5,6 +5,7 @@
     <html> [https://raw.githubusercontent.com/r3n/giuliolunati.renclib/master/usr/lib/r3/html.reb]
     <httpd> [https://raw.githubusercontent.com/r3n/renclib/master/outdated/modules/httpd.reb]
     <json> [https://raw.githubusercontent.com/r3n/renclib/master/modules/json.reb]
+    <lastest-of> [https://raw.githubusercontent.com/gchiu/rebol-misc/master/latest-of.reb]
     <mysql> [https://raw.githubusercontent.com/zsx/mysql-r3/ren-c/mysql-protocol-pre.r]
     <nzpower> [https://gitlab.com/Zhaoshirong/nzpower/raw/master/nzpower.reb]
     <dnzpower> [https://gitlab.com/Zhaoshirong/nzpower/raw/Development/nzpower.reb]
