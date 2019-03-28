@@ -148,7 +148,7 @@ sys/make-scheme [
             redirect: get in response 'redirect
             print: get in response 'print
 
-            (match block! server/spec/actions else [default-response])
+            ((match block! server/spec/actions else [default-response]))
         ]
 
         server/locals/subport: make port! [scheme: 'tcp]
@@ -468,20 +468,19 @@ sys/make-scheme [
             response/content: gzip response/content
         ]
 
-        if error? trap [
-            outcome: write client hdr: build-header response
+        if error? error: trap [
+            write client hdr: build-header response
         ] [
-            all [
-                outcome/code = 5020
-                outcome/id = 'write-error
-                find [32 104] outcome/arg2
-            ] then [
-                net-utils/net-log [
-                    "Response headers not sent to client:"
-                        "reason #" outcome/arg2
-                ]
-            ] else [
-                fail :outcome
+            ?? error
+            net-utils/net-log [
+                "Response headers not sent to client:"
+                    "reason: " error/message
+            ]
+            if not find [
+                "Connection reset by peer"
+                "Broken pipe"
+            ] error/message [
+                fail :error
             ]
         ]
 
@@ -500,25 +499,24 @@ sys/make-scheme [
         case [
             empty? port/locals/wire [_]
 
-            error? trap [
+            error? error: trap [
                 outcome: write port take/part port/locals/wire 32'000 ; 2'000'000
             ][
-                ;; only mask some errors:
-                all [
-                    outcome/code = 5020
-                    outcome/id = 'write-error
-                    find [32 104] outcome/arg2
+                ?? error
+                net-utils/net-log [
+                    "Part or whole of response not sent to client:"
+                        "reason: " error/message
                 ]
-                then [
-                    net-utils/net-log [
-                        "Part or whole of response not sent to client:"
-                            "reason #" outcome/arg2
-                    ]
+                ;; only mask some errors:
+                if find [
+                    "Connection reset by peer"
+                    "Broken pipe"
+                ] error/message [
                     clear port/locals/wire
                     _
                 ]
                 else [
-                    fail :outcome
+                    fail :error
                 ]
             ]
 

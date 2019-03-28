@@ -1,3 +1,4 @@
+#!/usr/bin/r3
 REBOL [Name: "webserver"]
 -help: does [lib/print {
 USAGE: r3 webserver.reb [OPTIONS]
@@ -21,7 +22,7 @@ a: system/options/args
 iterate a [case [
     "-a" = a/1 [
       a: next a
-      ?? access-dir: case [
+      access-dir: case [
         tail? a [true]
         a/1 = "true" [true]
         a/1 = "false" [false]
@@ -38,11 +39,11 @@ iterate a [case [
 import 'httpd
 attempt [
   rem: import 'rem
-  to-html: import 'to-html
+  html: import 'html
 ]
-?? rem-to-html: attempt[chain [:rem/load-rem :to-html/to-html]]
+rem-to-html: attempt[chain [:rem/load-rem :html/to-html]]
 
-cd :system/options/path
+cd (:system/options/path)
 ext-map: [
   "css" css
   "gif" gif
@@ -150,7 +151,7 @@ handle-request: function [
     return redirect-response join request/target dir-index
   ]
   if path-type = 'file [
-    pos: try find/last last path-elements
+    pos: try find-last last path-elements
       "."
     file-ext: (if pos [copy next pos] else [_])
     mimetype: try attempt [ext-map/:file-ext]
@@ -169,10 +170,9 @@ handle-request: function [
       ]
     ][
       rem/rem/request: request
-      if trap [
-        rem/rem/reset
+      if error: trap [
         data: rem-to-html data
-      ] [ data: form data mimetype: 'text ]
+      ] [ data: form error mimetype: 'text ]
       else [ mimetype: 'html ]
     ]
     if mimetype = 'rebol [
@@ -206,6 +206,13 @@ redirect-response: function [target] [
 ;; MAIN
 server: open compose [
   scheme: 'httpd (port) [
+    if verbose >= 2 [lib/print mold request]
+    if verbose >= 1 [
+      lib/print spaced [
+        request/method
+        request/request-uri
+      ]
+    ]
     res: handle-request request
     if integer? res [
       response/status: res
@@ -220,12 +227,7 @@ server: open compose [
       response/type: res/2
       response/content: to-binary res/3
     ]
-    if verbose >= 2 [lib/print mold request]
     if verbose >= 1 [
-      lib/print spaced [
-        request/method
-        request/request-uri
-      ]
       lib/print spaced ["=>" response/status]
     ]
   ]
