@@ -13,7 +13,7 @@ Rebol [
     History: [
         01-Jul-2018 0.5.1 "Updated to build e560322 (@giuliolunati)"
         09-Jul-2017 0.5.0 "Use linked lists for document model"
-        02-Apr-2017 0.4.1 "Ported to Ren-C" 
+        02-Apr-2017 0.4.1 "Ported to Ren-C"
         07-Apr-2014 0.4.1 "Fixed loop when handling unterminated empty tags"
         14-Apr-2013 0.4.0 "Added /PATH method"
         16-Feb-2013 0.3.0 "Switch to using PATH! type to represent Namespaces"
@@ -85,7 +85,7 @@ load-xml: use [
         ;     ] true 2
         ; ]
 
-        insert-before: func [item [block! map!] /local new][
+        insert-before: func [item [block! map!] <local> new][
             new: make-item item/parent
 
             new/back: item/back
@@ -100,7 +100,7 @@ load-xml: use [
             item/back: new
         ]
 
-        insert-after: func [item [block! map!] /local new][
+        insert-after: func [item [block! map!] <local> new][
             new: make-item item/parent
 
             new/back: item
@@ -213,7 +213,7 @@ load-xml: use [
             ]
         ]
 
-        get-by-tag: func [tag [tag! issue!] /local type][
+        get-by-tag: func [tag [tag! issue!] <local> type][
             tag: discern-tag tag
 
             collect [
@@ -228,7 +228,7 @@ load-xml: use [
             ]
         ]
 
-        get-by-id: func [id [issue! text!] /local rule at hit][
+        get-by-id: func [id [issue! text!] <local> rule at hit][
             any [
                 text? id
                 id: remove mold id
@@ -247,7 +247,7 @@ load-xml: use [
             ]
         ]
 
-        text: func [/local rule text part][
+        text: func [<local> rule text part][
             unspaced collect [
                 walk [
                     if find [text whitespace cdata] node/type [
@@ -291,13 +291,13 @@ load-xml: use [
             ]
         ]
 
-        parent: func [/local branch][
+        parent: func [<local> branch][
             unless tree/parent/type = 'document [
                 make-node tree/parent
             ]
         ]
 
-        path: func [path [block! path!] /local result selectors selector kids][
+        path: func [path [block! path!] <local> result selectors selector kids][
             unless parse path [some ['* [tag! | issue!] | tag! | issue! | integer!] opt '?][
                 do make error! "Invalid XML Path Spec"
             ]
@@ -481,7 +481,7 @@ load-xml: use [
         ]
     ]
 
-    probe-node: func [node [block! map!] /local clone][
+    probe-node: func [node [block! map!] <local> clone][
         clone: copy node
         clone/parent: all [block? clone/parent to tag! clone/parent/name]
         clone/next: all [block? clone/next to tag! clone/next/name]
@@ -605,7 +605,7 @@ load-xml: use [
 
         header: [
             any [
-                  space 
+                  space
                 | "<" ["?xml" thru "?>" | "!" ["--" thru "-->" | thru ">"] | "?" thru "?>"]
             ]
         ]
@@ -621,7 +621,7 @@ load-xml: use [
         "Transform an XML document to a Rebol block"
         source [any-string!] "An XML string/location to transform"
         /dom "Returns an object with DOM-like methods to traverse the XML tree"
-        /local document
+        <local> document
     ][
         case/all [
             any [file? source url? source][source: read source]

@@ -64,12 +64,12 @@ error-template: trim/auto copy {
     <a href="http://www.rebol.com/rebol3/">REBOL 3</a> $r3</body></html>
 }
 
-error-response: func [code uri /local values] [
+error-response: func [code uri <local> values] [
     values: [code (code) text (code-map/:code) uri (uri) r3 (system/version)]
     reduce [code "text/html" reword error-template compose values]
 ]
 
-start-response: func [port res /local code text type body] [
+start-response: func [port res <local> code text type body] [
     set [code type body] res
     write port ajoin ["HTTP/1.0 " code " " code-map/:code crlf]
     write port ajoin ["Content-type: " type crlf]
@@ -154,7 +154,7 @@ handle-request: function [config req] [
         (mime: select mime-map ext)
     ]
     mime: default ["application/octet-stream"]
-    
+
     if error? try [data: read file] [return error-response 400 uri]
     reduce [200 mime data]
 ]
@@ -193,7 +193,7 @@ awake-client: function [event] [
     ]
 ]
 
-awake-server: func [event /local client] [
+awake-server: func [event <local> client] [
     if event/type = 'accept [
         client: first event/port
         client/awake: :awake-client
@@ -201,7 +201,7 @@ awake-server: func [event /local client] [
     ]
 ]
 
-serve: func [web-port web-root /local listen-port] [
+serve: func [web-port web-root <local> listen-port] [
     listen-port: open rejoin [tcp://: web-port]
     listen-port/locals: make object! compose/deep [config: [root: (web-root)]]
     listen-port/awake: :awake-server
