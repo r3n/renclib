@@ -281,7 +281,7 @@ sys/make-scheme [
             type: "text/plain"
         ]
 
-        redirect: method [target [url! file!] /as code [integer!]] [
+        redirect: method [target [url! file!] /code [integer!]] [
             status: code: default [303]
             content: "Redirecting..."
             type: "text/plain"
