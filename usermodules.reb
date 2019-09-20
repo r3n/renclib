@@ -3,6 +3,7 @@
     <curl> [https://raw.githubusercontent.com/rgchris/Scripts/master/ren-c/curl.reb]
     <dl-renc> [https://raw.githubusercontent.com/gchiu/Rebol3/master/scripts/dl-renc.reb]
     <dot> [https://raw.githubusercontent.com/giuliolunati/ren-c-lib/master/usr/lib/r3/modules/dot.reb]
+    <webeditor> [https://raw.githubusercontent.com/IngoHohmann/rebol-web-scripts/master/editor.r]
     <html> [https://raw.githubusercontent.com/giuliolunati/ren-c-lib/master/usr/lib/r3/modules/html.reb]
     <httpd> [https://raw.githubusercontent.com/r3n/renclib/master/modules/httpd.reb]
     <json> [https://raw.githubusercontent.com/r3n/renclib/master/modules/json.reb]
