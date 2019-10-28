@@ -179,11 +179,11 @@ load-xml: use [
             do make error! "Function is deprecated."
         ]
 
-        walk: func [callback [block!] /into child [block! map!] /only][
+        walk: func [callback [block!] /into [block! map!] /only][
             use [node] compose/deep [
-                node: any [:child tree/first]
+                node: any [:into tree/first]
                 while [node][
-                    (callback) |
+                    do (callback) |
                     if all [not only node/first][
                         walk/into :callback node/first
                     ]
@@ -415,8 +415,6 @@ load-xml: use [
                     ]
                 ] true 3
             ]
-
-            does [form-node tree]
         ]
 
         flatten: use [xml path emit encode enspace form-node][
@@ -557,7 +555,7 @@ load-xml: use [
             ]
         ]
 
-        element: use [tag name namespace value mark this][
+        element: use [tag name namespace value here this][
             [    #"<" [
                     (namespace: _)
                     copy tag [
@@ -584,7 +582,7 @@ load-xml: use [
                             )
                             |
                             ; temporary error marker
-                            mark: "</" (print ["Expected:" rejoin [</> branch/1]]) :mark ?? fail
+                            here: "</" (print ["Expected:" rejoin [</> branch/1]]) :here ?? fail
                         ]
                         |
                         ; temporary error marker
@@ -633,7 +631,7 @@ load-xml: use [
 
         either parse/case source xml-rule [
             document: make-node/document root/last
-            either dom [document][document/as-block]
+            either dom [document][document/as-block document/tree]
         ][
             do make error! "Could Not Parse XML Source"
         ]
