@@ -5,6 +5,7 @@
     <chessb> [https://gitlab.com/Zhaoshirong/rebol-chess/raw/test-branch/create-board.reb]
     <dl-renc> [https://raw.githubusercontent.com/gchiu/Rebol3/master/scripts/dl-renc.reb]
     <docx> [https://raw.githubusercontent.com/gchiu/rebol-misc/master/create-docx.reb]
+    <download-latest> [https://gist.githubusercontent.com/gchiu/b8ac8c9e1097c23ba254bf757a21aada/raw/4f21f7d9580b88755aa68e9e3593d5e944710e47/check-rebols.reb]
     <downloads> [https://dd498l1ilnrxu.cloudfront.net/code.reb]
     <editor> [https://raw.githubusercontent.com/IngoHohmann/rebol-web-scripts/master/editor.r]
     <httpd> [https://raw.githubusercontent.com/r3n/renclib/master/outdated/modules/httpd.reb]
