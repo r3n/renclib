@@ -1,6 +1,7 @@
 [
     <amazon-s3> [http://reb4.me/r3/s3.reb]
     <changelog> [https://raw.githubusercontent.com/r3n/renclib/master/outdated/utils/changes.reb]
+    <chat> [https://gitlab.com/Zhaoshirong/rebol-chat/-/raw/master/src/chat.reb]
     <chess> [https://gitlab.com/Zhaoshirong/rebol-chess/raw/master/create-board.reb]
     <chessb> [https://gitlab.com/Zhaoshirong/rebol-chess/raw/test-branch/create-board.reb]
     <dl-renc> [https://raw.githubusercontent.com/gchiu/Rebol3/master/scripts/dl-renc.reb]
