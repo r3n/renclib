@@ -27,6 +27,7 @@
     <trello> [http://codeconscious.com/rebol-scripts/trello.r]
     <twitter> [https://raw.githubusercontent.com/gchiu/rebolbot/master/twitter.r3]
     <upgrade> [https://raw.githubusercontent.com/gchiu/rebol-misc/master/upgrade.reb]
+    <userstuff> [https://raw.githubusercontent.com/r3n/renclib/master/utils/userstuff.reb]
     <webeditor> [https://raw.githubusercontent.com/IngoHohmann/rebol-web-scripts/master/editor.r]
     <webform> [https://raw.githubusercontent.com/r3n/renclib/master/modules/webform.reb]
     <webserver> [https://raw.githubusercontent.com/giuliolunati/ren-c-lib/master/usr/lib/r3/utils/webserver.reb]
