@@ -7,10 +7,18 @@ project: ask "Your project?"
 if any [ empty? repo empty? user empty? project][quit]
 
 file: _
+idx: %index.reb
 
 case  [
-  repo = "github" [file: to url!  unspaced [https://github.com/ user "/" project "/blob/master/index.reb"]]
-  repo = "gitlab" [file: to url! unspaced [https://gitlab.com/ user "/" project "/-/blob/master/index.reb"]]
+  repo = "github" [
+    if 1 < length of result: split project "/" [
+      parse result [thru "/" copy temp to end] 
+      idx: unspaced [temp "/" idx]
+      project: first result
+    ]
+    file: to url!  unspaced [https://github.com/ user "/" project "/blob/master/" idx]
+   ]
+  repo = "gitlab" [file: to url! unspaced [https://gitlab.com/ user "/" project "/-/blob/master/" idx]]
   true [print "repo not found" quit]
 ]
 
