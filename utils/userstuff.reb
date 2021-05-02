@@ -15,9 +15,6 @@ if any [ empty? repo empty? user empty? project][
 file: _
 idx: %index.reb
 
-
-== https://gitlab.com/Zhaoshirong/rebol-links/-/blob/master/scripts/index.reb
-
 case  [
   repo = "github" [
     if 1 < length of result: split project "/" [
