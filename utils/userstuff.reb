@@ -15,6 +15,9 @@ if any [ empty? repo empty? user empty? project][
 file: _
 idx: %index.reb
 
+
+== https://gitlab.com/Zhaoshirong/rebol-links/-/blob/master/scripts/index.reb
+
 case  [
   repo = "github" [
     if 1 < length of result: split project "/" [
@@ -26,7 +29,14 @@ case  [
     unset [repo user project idx temp]
     do file
    ]
-  repo = "gitlab" [file: to url! unspaced [https://gitlab.com/ user "/" project "/-/blob/master/" idx]
+  repo = "gitlab" 
+    if 1 < length of result: split project "/" [
+      parse project [thru "/" copy temp to end] 
+      idx: unspaced [temp "/" idx]
+      project: first result
+    ]
+    file: to url!  unspaced [https://github.com/ user "/" project "/-/blob/master/" idx]
+    unset [repo user project idx temp]
     do file
   ]
   true [print "repo not found" quit]
