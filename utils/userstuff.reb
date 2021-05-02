@@ -12,7 +12,7 @@ idx: %index.reb
 case  [
   repo = "github" [
     if 1 < length of result: split project "/" [
-      parse result [thru "/" copy temp to end] 
+      parse project [thru "/" copy temp to end] 
       idx: unspaced [temp "/" idx]
       project: first result
     ]
