@@ -29,7 +29,7 @@ case  [
     unset [repo user project idx temp]
     do file
    ]
-  repo = "gitlab" 
+  repo = "gitlab" [
     if 1 < length of result: split project "/" [
       parse project [thru "/" copy temp to end] 
       idx: unspaced [temp "/" idx]
