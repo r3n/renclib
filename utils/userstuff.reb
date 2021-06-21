@@ -23,7 +23,8 @@ case  [
       project: first result
     ]
     file: to url!  unspaced [https://github.com/ user "/" project "/blob/master/" idx]
-    unset [repo user project idx temp]
+    ; unset [repo user project idx temp]
+    repo: user: project: idx: temp: ~unset~
     print ["Your userfile (file) is at: " file]
     do file
    ]
@@ -34,7 +35,8 @@ case  [
       project: first result
     ]
     file: to url!  unspaced [https://gitlab.com/ user "/" project "/-/blob/master/" idx]
-    unset [repo user project idx temp]
+    ; unset [repo user project idx temp]
+    repo: user: project: idx: temp: ~unset~
     print ["Your userfile (file) is at: " file]
     do file
   ]
