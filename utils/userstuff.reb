@@ -25,10 +25,10 @@ case  [
     file: to url!  unspaced [https://github.com/ user "/" project "/blob/master/" idx]
     ; unset [repo user project idx temp]
     repo: user: project: idx: temp: ~unset~
-    if exists? file [
-      print ["Your userfile (file) is at: " file]
+    if error? trap [
       do file
-    ] else [
+      print ["Your userfile (file) is at: " file]
+    ][
       print "Repository not found.  Check userid, and repo name."
     ]
   ]
@@ -41,10 +41,10 @@ case  [
     file: to url!  unspaced [https://gitlab.com/ user "/" project "/-/blob/master/" idx]
     ; unset [repo user project idx temp]
     repo: user: project: idx: temp: ~unset~
-    if exists? file [
-      print ["Your userfile (file) is at: " file]
+    if error? trap [
       do file
-    ] else [
+      print ["Your userfile (file) is at: " file]
+    ][
       print "Repository not found.  Check userid, and repo name."
     ]
   ]
