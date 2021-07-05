@@ -26,8 +26,11 @@ case  [
     ; unset [repo user project idx temp]
     repo: user: project: idx: temp: ~unset~
     print ["Your userfile (file) is at: " file]
-    do file
-   ]
+    if exists? file [
+      do file
+    ] else [
+      print "Repository not found"
+    ]
   repo = "gitlab" [
     if 1 < length of result: split project "/" [
       parse project [thru "/" copy temp to end] 
@@ -38,7 +41,11 @@ case  [
     ; unset [repo user project idx temp]
     repo: user: project: idx: temp: ~unset~
     print ["Your userfile (file) is at: " file]
-    do file
+    if exists? file [
+      do file
+    ] else [
+      print "Repository not found"
+    ]
   ]
   true [print "repo not found" quit]
 ]
