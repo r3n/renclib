@@ -31,6 +31,7 @@ case  [
     ] else [
       print "Repository not found"
     ]
+  ]
   repo = "gitlab" [
     if 1 < length of result: split project "/" [
       parse project [thru "/" copy temp to end] 
