@@ -235,7 +235,7 @@ to-json: use [
     emit-date: use [pad second][
         pad: func [part length][part: to text! part head insert/dup part "0" length - length? part]
 
-        lit (
+        the (
             emits rejoin collect [
                 keep reduce [pad here/1/year 4 "-" pad here/1/month 2 "-" pad here/1/day 2]
                 if here/1/time [
@@ -291,7 +291,7 @@ to-json: use [
           lookup ; resolve a GET-WORD! reference
         | any-number! (emit here/1)
         | [logic! | 'true | 'false] (emit to text! here/1)
-        | [blank! | 'none | 'blank] (emit lit 'null)
+        | [blank! | 'none | 'blank] (emit the 'null)
         | date! emit-date
         | issue! emit-issue
         | [
