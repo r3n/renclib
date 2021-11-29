@@ -35,7 +35,6 @@ Rebol [
     }
 ]
 
-attempt [_: blank: none blank!: none! blank?: :none?]
 
 load-json: use [
     tree branch here val is-flat emit new-child to-parent neaten word to-word
@@ -71,7 +70,7 @@ load-json: use [
 
         func [val [text!]][
             all [
-                parse val [word1 any word+]
+                parse val [word1 while word+]
                 to word! val
             ]
         ]
@@ -79,7 +78,7 @@ load-json: use [
 
     space: use [space][
         space: charset " ^-^/^M"
-        [any space]
+        [while space]
     ]
 
     comma: [space #"," space]
@@ -109,27 +108,27 @@ load-json: use [
         decode: use [ch mk escape][
             escape: [
                 ; should be possible to use CHANGE keyword to replace escaped characters.
-                mk: #"\" [
+                mk: <here>, #"\" [
                     es (mk: change/part mk select mp mk/2 2)
                     |
                     #"u" copy ch 4 hx (
                         mk: change/part mk to char! to-integer/unsigned debase/base ch 16 6
                     )
-                ] :mk
+                ] seek mk
             ]
 
             func [text [text! blank!]][
                 either blank? text [make text! 0][
-                    all [parse text [any [to "\" escape] to end] text]
+                    all [parse text [while [to "\" escape] to <end>] text]
                 ]
             ]
         ]
 
-        [#"^"" copy val [any [some ch | #"\" [#"u" 4 hx | es]]] #"^"" (val: decode val)]
+        [#"^"" copy val [while [some ch | #"\" [#"u" 4 hx | es]]] #"^"" (val: decode val)]
     ]
 
     block: use [list][
-        list: [space opt [value any [comma value]] space]
+        list: [space opt [value while [comma value]] space]
 
         [#"[" new-child list #"]" neaten/1 to-parent]
     ]
@@ -149,7 +148,7 @@ load-json: use [
                 ]
             )
         ]
-        list: [space opt [name value any [comma name value]] space]
+        list: [space opt [name value while [comma name value]] space]
         as-map: [(if not is-flat [here: change back here make map! pick back here 1])]
 
         [#"{" new-child list #"}" neaten/2 to-parent as-map]
@@ -159,7 +158,7 @@ load-json: use [
         initial: charset ["$_" #"a" - #"z" #"A" - #"Z"]
         ident: union initial charset [#"0" - #"9"]
 
-        [initial any ident]
+        [initial while ident]
     ]
 
     value: [
@@ -221,7 +220,7 @@ to-json: use [
         ]
 
         func [txt][
-            parse txt [any [txt: some ch | skip (txt: encode txt) :txt]]
+            parse txt [while [txt: <here> some ch | skip (txt: encode txt) seek txt]]
             head txt
         ]
     ]
@@ -270,7 +269,7 @@ to-json: use [
     comma: [(if not tail? here [emit ","])]
 
     block: [
-        (emit "[") any [here: value here: comma] (emit "]")
+        (emit "[") while [here: <here> value here: <here> comma] (emit "]")
     ]
 
     block-of-pairs: [
@@ -280,10 +279,10 @@ to-json: use [
 
     object: [
         (emit "{")
-        any [
-            here: [set-word! (change here to word! here/1) | any-string! | any-word!]
+        while [
+            here: <here> [set-word! (change here to word! here/1) | any-string! | any-word!]
             (emit [{"} escape to text! here/1 {":}])
-            here: value here: comma
+            here: <here> value here: <here> comma
         ]
         (emit "}")
     ]
@@ -300,15 +299,15 @@ to-json: use [
         ] (emits escape form here/1)
         | any-word! (emits escape form to word! here/1)
 
-        | [object! | map!] :here (change/only here body-of first here) into object
-        | into block-of-pairs :here (change/only here copy first here) into object
-        | any-array! :here (change/only here copy first here) into block
+        | [object! | map!] seek here (change/only here body-of first here) into object
+        | into block-of-pairs seek here (change/only here copy first here) into object
+        | any-array! seek here (change/only here copy first here) into block
 
         | any-value! (emits to tag! type-of first here)
     ]
 
     func [data][
         json: make text! 1024
-        if parse compose/only [(data)][here: value][json]
+        if parse compose/only [(data)][here: <here>, value][json]
     ]
 ]
