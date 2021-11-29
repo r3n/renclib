@@ -70,7 +70,7 @@ load-json: use [
 
         func [val [text!]][
             all [
-                parse val [word1 while word+]
+                parse? val [word1 while word+]
                 to word! val
             ]
         ]
@@ -90,7 +90,7 @@ load-json: use [
 
         as-num: func [val [text!]][
             case [
-                not parse val [opt "-" some dg][to decimal! val]
+                not parse? val [opt "-" some dg][to decimal! val]
                 error? trap [val: to integer! val][to issue! val]
                 val [val]
             ]
@@ -119,7 +119,7 @@ load-json: use [
 
             func [text [text! blank!]][
                 either blank? text [make text! 0][
-                    all [parse text [while [to "\" escape] to <end>] text]
+                    all [parse? text [while [to "\" escape] to <end>], text]
                 ]
             ]
         ]
@@ -189,7 +189,7 @@ load-json: use [
         is-flat: :flat
         tree: here: make block! 0
 
-        either parse json either padded [
+        either parse? json either padded [
             [space ident space "(" space opt value space ")" opt ";" space]
         ][
             [space opt value space]
@@ -229,7 +229,7 @@ to-json: use [
         dg: charset "0123456789"
         nm: [opt "-" some dg]
 
-        [(either parse next form here/1 [copy mk nm][emit mk][emits here/1])]
+        [(either parse? next form here/1 [copy mk nm][emit mk][emits here/1])]
     ]
 
     emit-date: use [pad second][
@@ -308,6 +308,6 @@ to-json: use [
 
     func [data][
         json: make text! 1024
-        if parse compose/only [(data)][here: <here>, value][json]
+        if parse? compose/only [(data)][here: <here>, value][json]
     ]
 ]
