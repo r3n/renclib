@@ -280,7 +280,7 @@ to-json: use [
     object: [
         (emit "{")
         while [
-            here: <here> [set-word! (change here to word! here/1) | any-string! | any-word!]
+            here: <here> [set-word! (change/only here to word! here/1) | any-string! | any-word!]
             (emit [{"} escape to text! here/1 {":}])
             here: <here> value here: <here> comma
         ]
