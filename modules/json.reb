@@ -261,7 +261,7 @@ to-json: use [
     ]
 
     lookup: [
-        here: [get-word! | get-path!]
+        here: <here> [get-word! | get-path!]
         (change here reduce reduce [here/1])
         fail
     ]
