@@ -109,7 +109,7 @@ load-json: use [
             escape: [
                 ; should be possible to use CHANGE keyword to replace escaped characters.
                 mk: <here>, #"\" [
-                    es (mk: change/part mk select mp mk/2 2)
+                    es (mk: change/part mk select mp mk.2 2)
                     |
                     #"u" copy ch 4 hx (
                         mk: change/part mk to char! to-integer/unsigned debase/base ch 16 6
@@ -130,7 +130,7 @@ load-json: use [
     block: use [list][
         list: [space opt [value while [comma value]] space]
 
-        [#"[" new-child list #"]" neaten/1 to-parent]
+        [#"[" new-child list #"]" neaten.1 to-parent]
     ]
 
     _content: [#"{" space {"_content"} space #":" space value space "}"] ; Flickr
@@ -151,7 +151,7 @@ load-json: use [
         list: [space opt [name value while [comma name value]] space]
         as-map: [(if not is-flat [here: change back here make map! pick back here 1])]
 
-        [#"{" new-child list #"}" neaten/2 to-parent as-map]
+        [#"{" new-child list #"}" neaten.2 to-parent as-map]
     ]
 
     ident: use [initial ident][
@@ -214,8 +214,8 @@ to-json: use [
 
         encode: func [here][
             change/part here any [
-                select mp here/1
-                rejoin ["\u" skip tail form to-hex to integer! here/1 -4]
+                select mp here.1
+                rejoin ["\u" skip tail form to-hex to integer! here.1 -4]
             ] 1
         ]
 
@@ -229,7 +229,7 @@ to-json: use [
         dg: charset "0123456789"
         nm: [opt "-" some dg]
 
-        [(either parse? next form here/1 [copy mk nm][emit mk][emits here/1])]
+        [(either parse? next form here.1 [copy mk nm][emit mk][emits here.1])]
     ]
 
     emit-date: use [pad second][
@@ -237,22 +237,22 @@ to-json: use [
 
         the (
             emits rejoin collect [
-                keep reduce [pad here/1/year 4 "-" pad here/1/month 2 "-" pad here/1/day 2]
-                if here/1/time [
-                    keep reduce ["T" pad here/1/hour 2 ":" pad here/1/minute 2 ":"]
-                    keep either integer? here/1/second [
-                        pad here/1/second 2
+                keep reduce [pad here.1.year 4 "-" pad here.1.month 2 "-" pad here.1.day 2]
+                if here.1.time [
+                    keep reduce ["T" pad here.1.hour 2 ":" pad here.1.minute 2 ":"]
+                    keep either integer? here.1.second [
+                        pad here.1.second 2
                     ][
-                        second: split to text! here/1/second "."
-                        reduce [pad second/1 2 "." second/2]
+                        second: split to text! here.1.second "."
+                        reduce [pad second.1 2 "." second.2]
                     ]
                     keep either any [
-                        blank? here/1/zone
-                        zero? here/1/zone
+                        blank? here.1.zone
+                        zero? here.1.zone
                     ]["Z"][
                         reduce [
-                            either here/1/zone/hour < 0 ["-"]["+"]
-                            pad abs here/1/zone/hour 2 ":" pad here/1/zone/minute 2
+                            either here.1.zone.hour < 0 ["-"]["+"]
+                            pad abs here.1.zone.hour 2 ":" pad here.1.zone.minute 2
                         ]
                     ]
                 ]
@@ -262,7 +262,7 @@ to-json: use [
 
     lookup: [
         here: <here> [get-word! | get-path!]
-        (change here reduce reduce [here/1])
+        (change here reduce reduce [here.1])
         fail
     ]
 
@@ -280,8 +280,8 @@ to-json: use [
     object: [
         (emit "{")
         while [
-            here: <here> [set-word! (change/only here to word! here/1) | any-string! | any-word!]
-            (emit [{"} escape to text! here/1 {":}])
+            here: <here> [set-word! (change/only here to word! here.1) | any-string! | any-word!]
+            (emit [{"} escape to text! here.1 {":}])
             here: <here> value here: <here> comma
         ]
         (emit "}")
@@ -289,15 +289,15 @@ to-json: use [
 
     value: [
           lookup ; resolve a GET-WORD! reference
-        | any-number! (emit here/1)
-        | [logic! | 'true | 'false] (emit to text! here/1)
+        | any-number! (emit here.1)
+        | [logic! | 'true | 'false] (emit to text! here.1)
         | [blank! | 'none | 'blank] (emit the 'null)
         | date! emit-date
         | issue! emit-issue
         | [
             any-string! | word! | lit-word! | tuple! | pair! | money! | time!
-        ] (emits escape form here/1)
-        | any-word! (emits escape form to word! here/1)
+        ] (emits escape form here.1)
+        | any-word! (emits escape form to word! here.1)
 
         | [object! | map!] seek here (change/only here body-of first here) into object
         | into block-of-pairs seek here (change/only here copy first here) into object
