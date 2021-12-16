@@ -4,13 +4,14 @@ Rebol [
     Date: 18-Sep-2015
     Home: http://www.ross-gill.com/page/JSON_and_Rebol
     File: %json.reb
-    Version: 0.3.6.1
+    Version: 0.3.6.3
     Purpose: "Convert a Rebol block to a JSON string"
     Rights: http://opensource.org/licenses/Apache-2.0
     Type: module
     Name: json
     Exports: [load-json to-json]
     History: [
+        17-Dec-2021 0.3.6.3 "replaced rejoin with unspaced, to integer! with codepoint of"
         01-Jul-2018 0.3.6.2 "Updated to snapshot build e560322"
         25-Feb-2017 0.3.6.1 "Ren-C Compatibilities"
         18-Sep-2015 0.3.6 "Non-Word keys loaded as strings"
@@ -215,7 +216,7 @@ to-json: use [
         encode: func [here][
             change/part here any [
                 select mp here.1
-                rejoin ["\u" skip tail form to-hex to integer! here.1 -4]
+                unspaced ["\u" skip tail form to-hex codepoint of here.1 -4] ; to integer!
             ] 1
         ]
 
@@ -236,7 +237,7 @@ to-json: use [
         pad: func [part length][part: to text! part head insert/dup part "0" length - length? part]
 
         the (
-            emits rejoin collect [
+            emits unspaced collect [
                 keep reduce [pad here.1.year 4 "-" pad here.1.month 2 "-" pad here.1.day 2]
                 if here.1.time [
                     keep reduce ["T" pad here.1.hour 2 ":" pad here.1.minute 2 ":"]
