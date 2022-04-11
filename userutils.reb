@@ -19,7 +19,7 @@
     <popupdemo> [https://gitlab.com/hostilefork/popupdemo/raw/master/popupdemo.reb]
     <rebmu> [https://raw.githubusercontent.com/hostilefork/rebmu/master/rebmu.reb]
     <redbol> [https://raw.githubusercontent.com/metaeducation/ren-c/master/scripts/redbol.reb]
-    <rx> [https://github.com/gchiu/midcentral/blob/main/main.reb]
+    <rx> [https://raw.githubusercontent.com/gchiu/midcentral/main/main.reb]
     <send> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-send.reb]
     <smtp> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-smtp.reb]
     <static-downloads> [https://gist.githubusercontent.com/gchiu/b8ac8c9e1097c23ba254bf757a21aada/raw/4f21f7d9580b88755aa68e9e3593d5e944710e47/check-rebols.reb]
