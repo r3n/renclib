@@ -24,6 +24,7 @@
     <smtp> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-smtp.reb]
     <static-downloads> [https://gist.githubusercontent.com/gchiu/b8ac8c9e1097c23ba254bf757a21aada/raw/4f21f7d9580b88755aa68e9e3593d5e944710e47/check-rebols.reb]
     <synctcp> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-synctcp.reb]
+    <test-repl> [https://raw.githubusercontent.com/hostilefork/replpad-js/master/tests/interactive.test.reb]
     <travis> [https://gist.githubusercontent.com/gchiu/b8ac8c9e1097c23ba254bf757a21aada/raw/4f21f7d9580b88755aa68e9e3593d5e944710e47/check-rebols.reb]
     <trello> [http://codeconscious.com/rebol-scripts/trello.r]
     <twitter> [https://raw.githubusercontent.com/gchiu/rebolbot/master/twitter.r3]
