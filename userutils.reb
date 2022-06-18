@@ -18,7 +18,7 @@
     <dnzpower> [https://gitlab.com/Zhaoshirong/nzpower/raw/Development/nzpower.reb]
     <popupdemo> [https://gitlab.com/hostilefork/popupdemo/raw/master/popupdemo.reb]
     <rebmu> [https://raw.githubusercontent.com/hostilefork/rebmu/master/rebmu.reb]
-    <redbol> [https://raw.githubusercontent.com/metaeducation/ren-c/master/scripts/redbol.reb]
+    <redbol> [https://raw.githubusercontent.com/metaeducation/redbol/master/redbol.reb]
     <rx> [https://raw.githubusercontent.com/gchiu/midcentral/main/main.reb]
     <send> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-send.reb]
     <smtp> [https://raw.githubusercontent.com/gchiu/Rebol3/master/protocols/prot-smtp.reb]
