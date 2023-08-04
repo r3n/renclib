@@ -43,8 +43,8 @@ load-json: use [
 ][
     branch: make block! 10
 
-    emit: func [val][here: insert/only here val]
-    new-child: [(insert/only branch insert/only here here: make block! 10)]
+    emit: func [val][here: insert here val]
+    new-child: [(insert branch insert here here: make block! 10)]
     to-parent: [(here: take branch)]
     neaten: [
         (new-line/all head here true)
@@ -69,9 +69,9 @@ load-json: use [
             #"^(f900)" - #"^(FDCF)" #"^(FDF0)" - #"^(FFFD)"
         ]
 
-        func [val [text!]][
+        lambda [val [text!]][
             all [
-                parse? val [word1 while word+]
+                did parse3 val [word1 opt some word+]
                 to word! val
             ]
         ]
@@ -79,7 +79,7 @@ load-json: use [
 
     space: use [space][
         space: charset " ^-^/^M"
-        [while space]
+        [opt some space]
     ]
 
     comma: [space #"," space]
@@ -89,9 +89,9 @@ load-json: use [
         ex: [[#"e" | #"E"] opt [#"+" | #"-"] some dg]
         nm: [opt #"-" some dg opt [#"." some dg] opt ex]
 
-        as-num: func [val [text!]][
+        as-num: lambda [val [text!]][
             case [
-                not parse? val [opt "-" some dg][to decimal! val]
+                didn't parse3 val [opt "-" some dg][to decimal! val]
                 error? trap [val: to integer! val][to issue! val]
                 val [val]
             ]
@@ -120,16 +120,16 @@ load-json: use [
 
             func [text [text! blank!]][
                 either blank? text [make text! 0][
-                    all [parse? text [while [to "\" escape] to <end>], text]
+                    all [did parse3 text [opt some [to "\" escape] to <end>], text]
                 ]
             ]
         ]
 
-        [#"^"" copy val [while [some ch | #"\" [#"u" 4 hx | es]]] #"^"" (val: decode val)]
+        [#"^"" copy val [opt some [some ch | #"\" [#"u" 4 hx | es]]] #"^"" (val: decode val)]
     ]
 
     block: use [list][
-        list: [space opt [value while [comma value]] space]
+        list: [space opt [value opt some [comma value]] space]
 
         [#"[" new-child list #"]" neaten.1 to-parent]
     ]
@@ -149,7 +149,7 @@ load-json: use [
                 ]
             )
         ]
-        list: [space opt [name value while [comma name value]] space]
+        list: [space opt [name value opt some [comma name value]] space]
         as-map: [(if not is-flat [here: change back here make map! pick back here 1])]
 
         [#"{" new-child list #"}" neaten.2 to-parent as-map]
@@ -159,7 +159,7 @@ load-json: use [
         initial: charset ["$_" #"a" - #"z" #"A" - #"Z"]
         ident: union initial charset [#"0" - #"9"]
 
-        [initial while ident]
+        [initial opt some ident]
     ]
 
     value: [
@@ -190,7 +190,7 @@ load-json: use [
         is-flat: :flat
         tree: here: make block! 0
 
-        either parse? json either padded [
+        either did parse3 json either padded [
             [space ident space "(" space opt value space ")" opt ";" space]
         ][
             [space opt value space]
@@ -206,14 +206,16 @@ to-json: use [
     json emit emits escape emit-issue emit-date
     here lookup comma block object block-of-pairs value
 ][
-    emit: func [data][append json reduce data]
+    emit: func [data][
+        append json (non block! data else [spread reduce data])
+    ]
     emits: func [data][emit {"} emit data emit {"}]
 
     escape: use [mp ch encode][
         mp: [#"^/" "\n" #"^M" "\r" #"^-" "\t" #"^"" "\^"" #"\" "\\" #"/" "\/"]
         ch: intersect ch: charset [#" " - #"~"] difference ch charset extract mp 2
 
-        encode: func [here][
+        encode: lambda [here][
             change/part here any [
                 select mp here.1
                 unspaced ["\u" skip tail form to-hex codepoint of here.1 -4] ; to integer!
@@ -221,8 +223,10 @@ to-json: use [
         ]
 
         func [txt][
-            parse txt [while [txt: <here> some ch | skip (txt: encode txt) seek txt]]
-            head txt
+            parse3 txt [
+                opt some [txt: <here> some ch | skip (txt: encode txt) seek txt]
+            ]
+            return head txt
         ]
     ]
 
@@ -230,11 +234,14 @@ to-json: use [
         dg: charset "0123456789"
         nm: [opt "-" some dg]
 
-        [(either parse? next form here.1 [copy mk nm][emit mk][emits here.1])]
+        [(either did parse3 next form here.1 [copy mk nm][emit mk][emits here.1])]
     ]
 
     emit-date: use [pad second][
-        pad: func [part length][part: to text! part head insert/dup part "0" length - length? part]
+        pad: func [part length][
+            part: to text! part
+            return head insert/dup part "0" length - length? part
+        ]
 
         the (
             emits unspaced collect [
@@ -270,7 +277,7 @@ to-json: use [
     comma: [(if not tail? here [emit ","])]
 
     block: [
-        (emit "[") while [here: <here> value here: <here> comma] (emit "]")
+        (emit "[") opt some [here: <here> value here: <here> comma] (emit "]")
     ]
 
     block-of-pairs: [
@@ -280,8 +287,10 @@ to-json: use [
 
     object: [
         (emit "{")
-        while [
-            here: <here> [set-word! (change/only here to word! here.1) | any-string! | any-word!]
+        opt some [
+            here: <here> [
+                set-word! (change here to word! here.1) | any-string! | any-word!
+            ]
             (emit [{"} escape to text! here.1 {":}])
             here: <here> value here: <here> comma
         ]
@@ -292,7 +301,7 @@ to-json: use [
           lookup ; resolve a GET-WORD! reference
         | any-number! (emit here.1)
         | [logic! | 'true | 'false] (emit to text! here.1)
-        | [blank! | 'none | 'blank] (emit the 'null)
+        | [blank! | 'none | 'blank] (emit the null)
         | date! emit-date
         | issue! emit-issue
         | [
@@ -300,15 +309,36 @@ to-json: use [
         ] (emits escape form here.1)
         | any-word! (emits escape form to word! here.1)
 
-        | [object! | map!] seek here (change/only here body-of first here) into object
-        | into block-of-pairs seek here (change/only here copy first here) into object
-        | any-array! seek here (change/only here copy first here) into block
+        | [object! | map!] seek here (
+            ;
+            ; !!! This was `change here body-of first here`.  BODY-OF was a
+            ; sketchy idea for objects in the first place, but in particular
+            ; with the addition of nulls.  This does a workaround to try and
+            ; keep the tests in PatientDB working--but a better theory of
+            ; JSON interoperability is needed.
+            ;
+            change here map-each [key value] (first here) [
+                spread reduce [
+                    to set-word! key
+                    case [
+                        null? :value ['_]
+                        logic? :value [either value ['true] ['false]]
+                        true [:value]
+                    ]
+                ]
+            ]
+        ) into object
+        | into block-of-pairs seek here (change here copy first here) into object
+        | any-array! seek here (change here copy first here) into block
 
         | any-value! (emits to tag! type-of first here)
     ]
 
-    func [data][
+    lambda [data][
         json: make text! 1024
-        if parse? compose/only [(data)][here: <here>, value][json]
+        all [
+            did parse3 compose [(data)][here: <here>, value]
+            json
+        ]
     ]
 ]
