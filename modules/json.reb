@@ -245,14 +245,14 @@ to-json: use [
 
         the (
             emits unspaced collect [
-                keep reduce [pad here.1.year 4 "-" pad here.1.month 2 "-" pad here.1.day 2]
+                keep spread reduce [pad here.1.year 4 "-" pad here.1.month 2 "-" pad here.1.day 2]
                 if here.1.time [
-                    keep reduce ["T" pad here.1.hour 2 ":" pad here.1.minute 2 ":"]
+                    keep spread reduce ["T" pad here.1.hour 2 ":" pad here.1.minute 2 ":"]
                     keep either integer? here.1.second [
                         pad here.1.second 2
                     ][
                         second: split to text! here.1.second "."
-                        reduce [pad second.1 2 "." second.2]
+                        spread reduce [pad second.1 2 "." second.2]
                     ]
                     keep either any [
                         blank? here.1.zone
