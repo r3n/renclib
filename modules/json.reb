@@ -71,7 +71,7 @@ load-json: use [
 
         lambda [val [text!]][
             all [
-                did parse3 val [word1 try some word+]
+                ok? parse3 val [word1 try some word+]
                 to word! val
             ]
         ]
@@ -91,7 +91,7 @@ load-json: use [
 
         as-num: lambda [val [text!]][
             case [
-                didn't parse3 val [try "-" some dg][to decimal! val]
+                not ok? parse3 val [try "-" some dg][to decimal! val]
                 error? trap [val: to integer! val][to issue! val]
                 val [val]
             ]
@@ -113,14 +113,14 @@ load-json: use [
                     es (mk: change/part mk select mp mk.2 2)
                     |
                     #"u" copy ch 4 hx (
-                        mk: change/part mk to char! to-integer/unsigned debase/base ch 16 6
+                        mk: change/part mk codepoint-to-char to-integer/unsigned debase/base ch 16 6
                     )
                 ] seek mk
             ]
 
             func [text [text! blank!]][
                 either blank? text [make text! 0][
-                    all [did parse3 text [try some [to "\" escape] to <end>], text]
+                    all [ok? parse3 text [try some [to "\" escape] to <end>], text]
                 ]
             ]
         ]
@@ -190,7 +190,7 @@ load-json: use [
         is-flat: :flat
         tree: here: make block! 0
 
-        either did parse3 json either padded [
+        either ok? parse3 json either padded [
             [space ident space "(" space try value space ")" try ";" space]
         ][
             [space try value space]
@@ -224,7 +224,7 @@ to-json: use [
 
         func [txt][
             parse3 txt [
-                try some [txt: <here> some ch | skip (txt: encode txt) seek txt]
+                try some [txt: <here> some ch | <any> (txt: encode txt) seek txt]
             ]
             return head txt
         ]
@@ -234,7 +234,7 @@ to-json: use [
         dg: charset "0123456789"
         nm: [try "-" some dg]
 
-        [(either did parse3 next form here.1 [copy mk nm][emit mk][emits here.1])]
+        [(either ok? parse3 next form here.1 [copy mk nm][emit mk][emits here.1])]
     ]
 
     emit-date: use [pad second][
@@ -300,12 +300,12 @@ to-json: use [
     value: [
           lookup ; resolve a GET-WORD! reference
         | any-number! (emit here.1)
-        | [logic! | 'true | 'false] (emit to text! here.1)
+        | [logic?! | 'true | 'false] (emit to text! here.1)
         | [blank! | 'none | 'blank] (emit the null)
         | date! emit-date
         | issue! emit-issue
         | [
-            any-string! | word! | lit-word! | tuple! | pair! | money! | time!
+            any-string! | word! | lit-word?! | tuple! | pair! | money! | time!
         ] (emits escape form here.1)
         | any-word! (emits escape form to word! here.1)
 
@@ -337,7 +337,7 @@ to-json: use [
     lambda [data][
         json: make text! 1024
         all [
-            did parse3 compose [(data)][here: <here>, value]
+            ok? parse3 compose [(data)][here: <here>, value]
             json
         ]
     ]
