@@ -224,7 +224,7 @@ to-json: use [
 
         func [txt][
             parse3 txt [
-                try some [txt: <here> some ch | <any> (txt: encode txt) seek txt]
+                try some [txt: <here> some ch | skip (txt: encode txt) seek txt]
             ]
             return head txt
         ]
