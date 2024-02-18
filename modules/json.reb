@@ -289,7 +289,7 @@ to-json: use [
         (emit "{")
         try some [
             here: <here> [
-                set-word! (change here to word! here.1) | any-string! | any-word!
+                set-word! (change here to word! here.1) | &any-string? | &any-word?
             ]
             (emit [{"} escape to text! here.1 {":}])
             here: <here> value here: <here> comma
@@ -299,15 +299,15 @@ to-json: use [
 
     value: [
           lookup ; resolve a GET-WORD! reference
-        | any-number! (emit here.1)
+        | &any-number? (emit here.1)
         | [logic?! | 'true | 'false] (emit to text! here.1)
         | [blank! | 'none | 'blank] (emit the null)
         | date! emit-date
         | issue! emit-issue
         | [
-            any-string! | word! | lit-word?! | tuple! | pair! | money! | time!
+            &any-string? | word! | &lit-word? | tuple! | pair! | money! | time!
         ] (emits escape form here.1)
-        | any-word! (emits escape form to word! here.1)
+        | &any-word? (emits escape form to word! here.1)
 
         | [object! | map!] seek here (
             ;
@@ -329,9 +329,9 @@ to-json: use [
             ]
         ) into object
         | into block-of-pairs seek here (change here copy first here) into object
-        | any-array! seek here (change here copy first here) into block
+        | &any-array? seek here (change here copy first here) into block
 
-        | any-value! (emits to tag! type-of first here)
+        | &any-value? (emits to tag! type-of first here)
     ]
 
     lambda [data][
