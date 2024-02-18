@@ -331,7 +331,7 @@ to-json: use [
         | into block-of-pairs seek here (change here copy first here) into object
         | &any-array? seek here (change here copy first here) into block
 
-        | &any-value? (emits to tag! type-of first here)
+        | &any-value? (emits to tag! type of first here)
     ]
 
     lambda [data][
