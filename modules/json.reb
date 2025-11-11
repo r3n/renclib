@@ -36,7 +36,6 @@ Rebol [
     ]--
 ]
 
-
 load-json: use [
     tree branch here val is-flat emit new-child to-parent neaten word to-word
     space comma number string block object _content value ident
@@ -47,8 +46,8 @@ load-json: use [
     new-child: [(insert branch insert here here: make block! 10)]
     to-parent: [(here: take branch)]
     neaten: [
-        (new-line:all head here true)
-        (new-line:all:skip head here true 2)
+        (new-line:all head here 'yes)
+        (new-line:all:skip head here 'yes 2)
     ]
 
     to-word: use [word1 word+][
@@ -118,8 +117,8 @@ load-json: use [
                 ] seek mk
             ]
 
-            func [text [text! blank!]][
-                either blank? text [make text! 0][
+            lambda [text [<opt> text!]][
+                either not text [make text! 0][
                     all [ok? parse3 text [opt some [to "\" escape] to <end>], text]
                 ]
             ]
@@ -255,7 +254,7 @@ to-json: use [
                         spread reduce [pad second.1 2 "." second.2]
                     ]
                     keep either any [
-                        blank? here.1.zone
+                        null? here.1.zone
                         zero? here.1.zone
                     ]["Z"][
                         reduce [
@@ -300,8 +299,8 @@ to-json: use [
     value: [
           lookup ; resolve a GET-WORD reference
         | any-number?/ (emit here.1)
-        | [logic?/ | 'true | 'false] (emit to text! here.1)
-        | ['~null~ | 'none | 'blank] (emit the null)
+        | ['true | 'false] (emit to text! here.1)
+        | ['~null~] (emit the null)
         | date! emit-date
         | issue! emit-issue
         | [
@@ -321,9 +320,10 @@ to-json: use [
                 spread reduce [
                     to set-word! key
                     case [
-                        null? value ['_]
-                        logic? value [either value ['true] ['false]]
-                        true [value]
+                        null? value ['null]
+                        ; there is no #[true] or #[false], just words
+                        ; to be compatible with JSON, use the words and TRUE?/FALSE?
+                        <else> [value]
                     ]
                 ]
             ]
