@@ -149,7 +149,7 @@ load-json: use [
                 ]
             )
         ]
-        list: [space try [name value try some [comma name value]] space]
+        list: [space opt [name value opt some [comma name value]] space]
         as-map: [(if not is-flat [here: change back here make map! pick back here 1])]
 
         [#"{" new-child list #"}" neaten.2 to-parent as-map]
@@ -159,7 +159,7 @@ load-json: use [
         initial: charset ["$_" #"a" - #"z" #"A" - #"Z"]
         ident: union initial charset [#"0" - #"9"]
 
-        [initial try some ident]
+        [initial opt some ident]
     ]
 
     value: [
@@ -191,9 +191,9 @@ load-json: use [
         tree: here: make block! 0
 
         either ok? parse3 json either padded [
-            [space ident space "(" space try value space ")" try ";" space]
+            [space ident space "(" space opt value space ")" opt ";" space]
         ][
-            [space try value space]
+            [space opt value space]
         ][
             pick tree 1
         ][
@@ -224,7 +224,7 @@ to-json: use [
 
         func [txt][
             parse3 txt [
-                try some [txt: <here> some ch | skip (txt: encode txt) seek txt]
+                opt some [txt: <here> some ch | skip (txt: encode txt) seek txt]
             ]
             return head txt
         ]
@@ -232,7 +232,7 @@ to-json: use [
 
     emit-issue: use [dg nm mk][
         dg: charset "0123456789"
-        nm: [try "-" some dg]
+        nm: [opt "-" some dg]
 
         [(either ok? parse3 next form here.1 [copy mk nm][emit mk][emits here.1])]
     ]
@@ -277,7 +277,7 @@ to-json: use [
     comma: [(if not tail? here [emit ","])]
 
     block: [
-        (emit "[") try some [here: <here> value here: <here> comma] (emit "]")
+        (emit "[") opt some [here: <here> value here: <here> comma] (emit "]")
     ]
 
     block-of-pairs: [
@@ -287,7 +287,7 @@ to-json: use [
 
     object: [
         (emit "{")
-        try some [
+        opt some [
             here: <here> [
                 set-word?/ (change here to word! here.1) | &any-string? | &any-word?
             ]
