@@ -174,7 +174,7 @@ load-json: use [
 
     func [
         "Convert a JSON string to Rebol data"
-        json [text! binary! file! url!] "JSON string"
+        json [text! blob! file! url!] "JSON string"
         :flat "Objects are imported as tag-value pairs"
         :padded "Loads JSON data wrapped in a JSONP envelope"
     ][
@@ -184,7 +184,7 @@ load-json: use [
                     do json
                 ]
             ]
-            binary? json [json: to text! json]
+            blob? json [json: to text! json]
         ]
 
         is-flat: flat
