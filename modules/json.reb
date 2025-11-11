@@ -71,7 +71,7 @@ load-json: use [
 
         lambda [val [text!]][
             all [
-                ok? parse3 val [word1 try some word+]
+                ok? parse3 val [word1 opt some word+]
                 to word! val
             ]
         ]
@@ -79,19 +79,19 @@ load-json: use [
 
     space: use [space][
         space: charset " ^-^/^M"
-        [try some space]
+        [opt some space]
     ]
 
     comma: [space #"," space]
 
     number: use [dg ex nm as-num][
         dg: charset "0123456789"
-        ex: [[#"e" | #"E"] try [#"+" | #"-"] some dg]
-        nm: [try #"-" some dg try [#"." some dg] try ex]
+        ex: [[#"e" | #"E"] opt [#"+" | #"-"] some dg]
+        nm: [opt #"-" some dg opt [#"." some dg] opt ex]
 
         as-num: lambda [val [text!]][
             case [
-                not ok? parse3 val [try "-" some dg][to decimal! val]
+                not ok? parse3 val [opt "-" some dg][to decimal! val]
                 error? trap [val: to integer! val][to issue! val]
                 val [val]
             ]
@@ -120,16 +120,16 @@ load-json: use [
 
             func [text [text! blank!]][
                 either blank? text [make text! 0][
-                    all [ok? parse3 text [try some [to "\" escape] to <end>], text]
+                    all [ok? parse3 text [opt some [to "\" escape] to <end>], text]
                 ]
             ]
         ]
 
-        [#"^"" copy val [try some [some ch | #"\" [#"u" 4 hx | es]]] #"^"" (val: decode val)]
+        [#"^"" copy val [opt some [some ch | #"\" [#"u" 4 hx | es]]] #"^"" (val: decode val)]
     ]
 
     block: use [list][
-        list: [space try [value try some [comma value]] space]
+        list: [space opt [value opt some [comma value]] space]
 
         [#"[" new-child list #"]" neaten.1 to-parent]
     ]
