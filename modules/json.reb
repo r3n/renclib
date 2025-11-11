@@ -16,7 +16,7 @@ Rebol [
         25-Feb-2017 0.3.6.1 "Ren-C Compatibilities"
         18-Sep-2015 0.3.6 "Non-Word keys loaded as strings"
         17-Sep-2015 0.3.5 "Added GET-PATH! lookup"
-        16-Sep-2015 0.3.4 "Reinstate /FLAT refinement"
+        16-Sep-2015 0.3.4 "Reinstate :FLAT refinement"
         21-Apr-2015 0.3.3 --[
             - Merge from Reb4.me version
             - Recognise set-word pairs as objects
@@ -47,8 +47,8 @@ load-json: use [
     new-child: [(insert branch insert here here: make block! 10)]
     to-parent: [(here: take branch)]
     neaten: [
-        (new-line/all head here true)
-        (new-line/all/skip head here true 2)
+        (new-line:all head here true)
+        (new-line:all:skip head here true 2)
     ]
 
     to-word: use [word1 word+][
@@ -110,10 +110,10 @@ load-json: use [
             escape: [
                 ; should be possible to use CHANGE keyword to replace escaped characters.
                 mk: <here>, #"\" [
-                    es (mk: change/part mk select mp mk.2 2)
+                    es (mk: change:part mk select mp mk.2 2)
                     |
                     #"u" copy ch 4 hx (
-                        mk: change/part mk codepoint-to-char to-integer/unsigned debase/base ch 16 6
+                        mk: change:part mk codepoint-to-char to-integer:unsigned debase:base ch 16 6
                     )
                 ] seek mk
             ]
@@ -175,19 +175,19 @@ load-json: use [
     func [
         "Convert a JSON string to Rebol data"
         json [text! binary! file! url!] "JSON string"
-        /flat "Objects are imported as tag-value pairs"
-        /padded "Loads JSON data wrapped in a JSONP envelope"
+        :flat "Objects are imported as tag-value pairs"
+        :padded "Loads JSON data wrapped in a JSONP envelope"
     ][
-        case/all [
+        case:all [
             any [file? json url? json][
-                if error? trap [json: read/string (json)][
-                    do :json
+                if error? trap [json: read:string (json)][
+                    do json
                 ]
             ]
             binary? json [json: to text! json]
         ]
 
-        is-flat: :flat
+        is-flat: flat
         tree: here: make block! 0
 
         either ok? parse3 json either padded [
@@ -216,7 +216,7 @@ to-json: use [
         ch: intersect ch: charset [#" " - #"~"] difference ch charset extract mp 2
 
         encode: lambda [here][
-            change/part here any [
+            change:part here any [
                 select mp here.1
                 unspaced ["\u" skip tail form to-hex codepoint of here.1 -4] ; to integer!
             ] 1
@@ -240,7 +240,7 @@ to-json: use [
     emit-date: use [pad second][
         pad: func [part length][
             part: to text! part
-            return head insert/dup part "0" length - length? part
+            return head insert:dup part "0" length - length? part
         ]
 
         the (
@@ -321,9 +321,9 @@ to-json: use [
                 spread reduce [
                     to set-word! key
                     case [
-                        null? :value ['_]
-                        logic? :value [either value ['true] ['false]]
-                        true [:value]
+                        null? value ['_]
+                        logic? value [either value ['true] ['false]]
+                        true [value]
                     ]
                 ]
             ]
