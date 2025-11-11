@@ -289,7 +289,7 @@ to-json: use [
         (emit "{")
         opt some [
             here: <here> [
-                set-word?/ (change here to word! here.1) | &any-string? | &any-word?
+                set-word?/ (change here to word! here.1) | any-string?/ | any-word?/
             ]
             (emit [-["]- escape to text! here.1 -[":]-])
             here: <here> value here: <here> comma
