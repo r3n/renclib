@@ -1,16 +1,16 @@
 Rebol [
-    Title: "JSON Parser for Rebol 3"
-    Author: "Christopher Ross-Gill"
-    Date: 18-Sep-2015
-    Home: http://www.ross-gill.com/page/JSON_and_Rebol
-    File: %json.reb
-    Version: 0.3.6.3
-    Purpose: "Convert a Rebol block to a JSON string"
-    Rights: http://opensource.org/licenses/Apache-2.0
-    Type: module
-    Name: json
-    Exports: [load-json to-json]
-    History: [
+    title: "JSON Parser for Rebol 3"
+    author: "Christopher Ross-Gill"
+    date: 18-Sep-2015
+    home: http://www.ross-gill.com/page/JSON_and_Rebol
+    file: %json.reb
+    version: 0.3.6.3
+    purpose: "Convert a Rebol block to a JSON string"
+    rights: http://opensource.org/licenses/Apache-2.0
+    type: module
+    name: json
+    exports: [load-json to-json]
+    history: [
         17-Dec-2021 0.3.6.3 "replaced rejoin with unspaced, to integer! with codepoint of"
         01-Jul-2018 0.3.6.2 "Updated to snapshot build e560322"
         25-Feb-2017 0.3.6.1 "Ren-C Compatibilities"
@@ -31,7 +31,7 @@ Rebol [
         06-Aug-2010 0.2.2 "Issue! composed of digits encoded as integers"
         22-May-2005 0.1.0 "Original Version"
     ]
-    Notes: --[
+    notes: --[
         - Converts date! to RFC 3339 Date String
     ]--
 ]
