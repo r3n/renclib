@@ -17,12 +17,12 @@ Rebol [
         18-Sep-2015 0.3.6 "Non-Word keys loaded as strings"
         17-Sep-2015 0.3.5 "Added GET-PATH! lookup"
         16-Sep-2015 0.3.4 "Reinstate /FLAT refinement"
-        21-Apr-2015 0.3.3 {
+        21-Apr-2015 0.3.3 --[
             - Merge from Reb4.me version
             - Recognise set-word pairs as objects
             - Use map! as the default object type
             - Serialize dates in RFC 3339 form
-        }
+        ]--
         14-Mar-2015 0.3.2 "Converts Json input to string before parsing"
         07-Jul-2014 0.3.0 "Initial support for JSONP"
         15-Jul-2011 0.2.6 "Flattens Flickr '_content' objects"
@@ -31,9 +31,9 @@ Rebol [
         06-Aug-2010 0.2.2 "Issue! composed of digits encoded as integers"
         22-May-2005 0.1.0 "Original Version"
     ]
-    Notes: {
+    Notes: --[
         - Converts date! to RFC 3339 Date String
-    }
+    ]--
 ]
 
 
@@ -101,8 +101,8 @@ load-json: use [
     ]
 
     string: use [ch es hx mp decode][
-        ch: complement charset {\"}
-        es: charset {"\/bfnrt}
+        ch: complement charset --[\"]--
+        es: charset --["\/bfnrt]--
         hx: charset "0123456789ABCDEFabcdef"
         mp: [#"^"" "^"" #"\" "\" #"/" "/" #"b" "^H" #"f" "^L" #"r" "^M" #"n" "^/" #"t" "^-"]
 
@@ -134,7 +134,7 @@ load-json: use [
         [#"[" new-child list #"]" neaten.1 to-parent]
     ]
 
-    _content: [#"{" space {"_content"} space #":" space value space "}"] ; Flickr
+    _content: [#"{" space -["_content"]- space #":" space value space "}"] ; Flickr
 
     object: use [name list as-map][
         name: [
@@ -209,7 +209,7 @@ to-json: use [
     emit: func [data][
         append json (non block! data else [spread reduce data])
     ]
-    emits: func [data][emit {"} emit data emit {"}]
+    emits: func [data][emit -["]- emit data emit -["]-]
 
     escape: use [mp ch encode][
         mp: [#"^/" "\n" #"^M" "\r" #"^-" "\t" #"^"" "\^"" #"\" "\\" #"/" "\/"]
@@ -291,7 +291,7 @@ to-json: use [
             here: <here> [
                 set-word! (change here to word! here.1) | &any-string? | &any-word?
             ]
-            (emit [{"} escape to text! here.1 {":}])
+            (emit [-["]- escape to text! here.1 -[":]-])
             here: <here> value here: <here> comma
         ]
         (emit "}")
