@@ -36,6 +36,9 @@ Rebol [
     ]--
 ]
 
+; Old definition of OK? (temporary, should rewrite parse rules)
+ok?: cascade [error?/ not/]
+
 load-json: use [
     tree branch here val is-flat emit new-child to-parent neaten word to-word
     space comma number string block object _content value ident
@@ -162,9 +165,9 @@ load-json: use [
     ]
 
     value: [
-          "null" (emit _)
-        | "true" (emit true)
-        | "false" (emit false)
+          "null" (emit '~null~)
+        | "true" (emit 'true)
+        | "false" (emit 'false)
         | number (emit val)
         | string (emit val)
         | _content
