@@ -163,10 +163,8 @@ load-json: use [
         :padded "Loads JSON data wrapped in a JSONP envelope"
     ][
         case:all [
-            any [file? json url? json][
-                if error? trap [json: read:string (json)][
-                    do json
-                ]
+            match [url! file!] json [
+                json: read:string (json)
             ]
             blob? json [json: to text! json]
         ]
@@ -181,7 +179,7 @@ load-json: use [
         ][
             pick tree 1
         ][
-            do make error! "Not a valid JSON string"
+            panic "Not a valid JSON string"
         ]
     ]
 ]
