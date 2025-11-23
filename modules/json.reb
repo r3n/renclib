@@ -271,7 +271,7 @@ to-json: use [
         (emit "{")
         opt some [
             here: <here> [
-                set-word?/ (change here to word! here.1) | any-string?/ | any-word?/
+                set-word?/ (change here unchain here.1) | any-string?/
             ]
             (emit [-["]- escape to text! here.1 -[":]-])
             here: <here> value here: <here> comma
@@ -289,7 +289,7 @@ to-json: use [
         | [
             any-string?/ | word! | lit-word?/ | tuple! | pair! | money! | time!
         ] (emits escape form here.1)
-        | any-word?/ (emits escape form to word! here.1)
+        | word! (emits escape form here.1)
 
         | [object! | map!] seek (here) (
             ;
@@ -312,7 +312,7 @@ to-json: use [
             ]
         ) into object
         | into block-of-pairs seek (here) (change here copy first here) into object
-        | any-array?/ seek (here) (change here copy first here) into block
+        | any-list?/ seek (here) (change here copy first here) into block
 
         | any-value?/ (emits to tag! type of first here)
     ]
