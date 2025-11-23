@@ -271,7 +271,7 @@ to-json: use [
     ]
 
     lookup: [
-        here: <here> [get-word?/ | get-path?/]
+        here: <here> match [@word! @path!]
         (change here reduce reduce [here.1])
         fail
     ]
@@ -300,7 +300,7 @@ to-json: use [
     ]
 
     value: [
-          lookup ; resolve a GET-WORD reference
+          lookup ; resolve an @WORD! or @PATH! reference
         | any-number?/ (emit here.1)
         | ['true | 'false] (emit to text! here.1)
         | ['~null~] (emit the null)
