@@ -301,7 +301,7 @@ to-json: use [
             ;
             change here map-each [key value] (first here) [
                 spread reduce [
-                    to set-word! key
+                    setify key
                     case [
                         null? value ['null]
                         ; there is no #[true] or #[false], just words
