@@ -1,38 +1,20 @@
 Rebol [
-    title: "JSON Parser for Rebol 3"
-    author: "Christopher Ross-Gill"
-    date: 18-Sep-2015
-    home: http://www.ross-gill.com/page/JSON_and_Rebol
+    title: "Work-in-Progress Ren-C variant of Rebol JSON Parser by @rgchris"
     file: %json.reb
-    version: 0.3.6.3
     purpose: "Convert a Rebol block to a JSON string"
     rights: http://opensource.org/licenses/Apache-2.0
     type: module
     name: json
     exports: [load-json to-json]
-    history: [
-        17-Dec-2021 0.3.6.3 "replaced rejoin with unspaced, to integer! with codepoint of"
-        01-Jul-2018 0.3.6.2 "Updated to snapshot build e560322"
-        25-Feb-2017 0.3.6.1 "Ren-C Compatibilities"
-        18-Sep-2015 0.3.6 "Non-Word keys loaded as strings"
-        17-Sep-2015 0.3.5 "Added GET-PATH! lookup"
-        16-Sep-2015 0.3.4 "Reinstate :FLAT refinement"
-        21-Apr-2015 0.3.3 --[
-            - Merge from Reb4.me version
-            - Recognise set-word pairs as objects
-            - Use map! as the default object type
-            - Serialize dates in RFC 3339 form
-        ]--
-        14-Mar-2015 0.3.2 "Converts Json input to string before parsing"
-        07-Jul-2014 0.3.0 "Initial support for JSONP"
-        15-Jul-2011 0.2.6 "Flattens Flickr '_content' objects"
-        02-Dec-2010 0.2.5 "Support for time! added"
-        28-Aug-2010 0.2.4 "Encodes tag! any-value! paired blocks as an object"
-        06-Aug-2010 0.2.2 "Issue! composed of digits encoded as integers"
-        22-May-2005 0.1.0 "Original Version"
-    ]
     notes: --[
-        - Converts date! to RFC 3339 Date String
+        Derived from code by @rgchris:
+        http://www.ross-gill.com/page/JSON_and_Rebol
+
+        The implementation method used series switching in PARSE as well as mutating
+        the input series, which presents challenges for Ren-C, so there are problems.
+
+        Discussion of further directions here:
+        https://rebol.metaeducation.com/t/json-and-rebol/2562
     ]--
 ]
 
@@ -73,7 +55,7 @@ load-json: use [
 
         lambda [val [text!]][
             all [
-                ok? parse3 val [word1 opt some word+]
+                ok? parse val [word1 opt some word+]
                 to word! val
             ]
         ]
@@ -93,13 +75,13 @@ load-json: use [
 
         as-num: lambda [val [text!]][
             case [
-                not ok? parse3 val [opt "-" some dg][to decimal! val]
+                not ok? parse val [opt "-" some dg][to decimal! val]
                 error? trap [val: to integer! val][to issue! val]
                 val [val]
             ]
         ]
 
-        [copy val nm (val: as-num val)]
+        [val: across nm (val: as-num val)]
     ]
 
     string: use [ch es hx mp decode][
@@ -114,20 +96,20 @@ load-json: use [
                 mk: <here>, #"\" [
                     es (mk: change:part mk select mp mk.2 2)
                     |
-                    #"u" copy ch 4 hx (
+                    #"u" ch: across repeat 4 hx (
                         mk: change:part mk codepoint-to-char to-integer:unsigned debase:base ch 16 6
                     )
-                ] seek mk
+                ] seek (mk)
             ]
 
             lambda [text [<opt> text!]][
                 either not text [make text! 0][
-                    all [ok? parse3 text [opt some [to "\" escape] to <end>], text]
+                    all [ok? parse text [opt some [to "\" escape] to <end>], text]
                 ]
             ]
         ]
 
-        [#"^"" copy val [opt some [some ch | #"\" [#"u" 4 hx | es]]] #"^"" (val: decode val)]
+        [#"^"" val: across [opt some [some ch | #"\" [#"u" repeat 4 hx | es]]] #"^"" (val: decode val)]
     ]
 
     block: use [list][
@@ -192,7 +174,7 @@ load-json: use [
         is-flat: flat
         tree: here: make block! 0
 
-        either ok? parse3 json either padded [
+        either ok? parse json either padded [
             [space ident space "(" space opt value space ")" opt ";" space]
         ][
             [space opt value space]
@@ -220,15 +202,15 @@ to-json: use [
         encode: lambda [here][
             change:part here any [
                 select mp here.1
-                unspaced ["\u" skip tail form to-hex codepoint of here.1 -4] ; to integer!
+                unspaced ["\u" skip tail of form to-hex codepoint of here.1 -4] ; to integer!
             ] 1
         ]
 
         func [txt][
-            parse3 txt [
-                opt some [txt: <here> some ch | skip (txt: encode txt) seek txt]
+            parse txt [
+                opt some [txt: <here> some ch | one (txt: encode txt) seek (txt)]  ; !!! series-switching
             ]
-            return head txt
+            return head of txt
         ]
     ]
 
@@ -236,13 +218,13 @@ to-json: use [
         dg: charset "0123456789"
         nm: [opt "-" some dg]
 
-        [(either ok? parse3 next form here.1 [copy mk nm][emit mk][emits here.1])]
+        [(either ok? parse next form here.1 [mk: across nm][emit mk][emits here.1])]
     ]
 
-    emit-date: use [pad second][
+    emit-date: use [pad second][  ; converts date! to RFC 3339 Date String
         pad: func [part length][
             part: to text! part
-            return head insert:dup part "0" length - length? part
+            return head of insert:dup part "0" length - length? part
         ]
 
         the (
@@ -273,7 +255,7 @@ to-json: use [
     lookup: [
         here: <here> match [@word! @path!]
         (change here reduce reduce [here.1])
-        fail
+        ahead '<fail>  ; no FAIL combinator in UPARSE, yet
     ]
 
     comma: [(if not tail? here [emit ","])]
@@ -283,8 +265,8 @@ to-json: use [
     ]
 
     block-of-pairs: [
-          some [set-word?/ skip]
-        | some [tag! skip]
+          some [set-word?/ one]
+        | some [tag! one]
     ]
 
     object: [
@@ -311,7 +293,7 @@ to-json: use [
         ] (emits escape form here.1)
         | any-word?/ (emits escape form to word! here.1)
 
-        | [object! | map!] seek here (
+        | [object! | map!] seek (here) (
             ;
             ; !!! This was `change here body-of first here`.  BODY-OF was a
             ; sketchy idea for objects in the first place, but in particular
@@ -331,8 +313,8 @@ to-json: use [
                 ]
             ]
         ) into object
-        | into block-of-pairs seek here (change here copy first here) into object
-        | any-array?/ seek here (change here copy first here) into block
+        | into block-of-pairs seek (here) (change here copy first here) into object
+        | any-array?/ seek (here) (change here copy first here) into block
 
         | any-value?/ (emits to tag! type of first here)
     ]
@@ -340,7 +322,7 @@ to-json: use [
     lambda [data][
         json: make text! 1024
         all [
-            ok? parse3 compose [(data)][here: <here>, value]
+            ok? parse compose [(data)][here: <here>, value]
             json
         ]
     ]
