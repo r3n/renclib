@@ -222,7 +222,7 @@ to-json: use [
     emit-date: use [pad second][  ; converts date! to RFC 3339 Date String
         pad: func [part length][
             part: to text! part
-            return head of insert:dup part "0" length - length? part
+            return head of insert:dup part "0" length - length of part
         ]
 
         the (
