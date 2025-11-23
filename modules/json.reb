@@ -76,7 +76,7 @@ load-json: use [
         as-num: lambda [val [text!]][
             case [
                 not ok? parse val [opt "-" some dg][to decimal! val]
-                error? trap [val: to integer! val][to issue! val]
+                error? val: to integer! val [to rune! val]
                 val [val]
             ]
         ]
@@ -185,7 +185,7 @@ load-json: use [
 ]
 
 to-json: use [
-    json emit emits escape emit-issue emit-date
+    json emit emits escape emit-rune emit-date
     here lookup comma block object block-of-pairs value
 ][
     emit: func [data][
@@ -212,7 +212,7 @@ to-json: use [
         ]
     ]
 
-    emit-issue: use [dg nm mk][
+    emit-rune: use [dg nm mk][
         dg: charset "0123456789"
         nm: [opt "-" some dg]
 
@@ -285,7 +285,7 @@ to-json: use [
         | ['true | 'false] (emit to text! here.1)
         | ['~null~] (emit the null)
         | date! emit-date
-        | issue! emit-issue
+        | rune! emit-rune
         | [
             any-string?/ | word! | lit-word?/ | tuple! | pair! | money! | time!
         ] (emits escape form here.1)
