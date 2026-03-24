@@ -18,9 +18,6 @@ Rebol [
     ]--
 ]
 
-; Old definition of OK? (temporary, should rewrite parse rules)
-ok?: cascade [error?/ not/]
-
 load-json: use [
     tree branch here val is-flat emit new-child to-parent neaten word to-word
     space comma number string block object _content value ident
@@ -55,7 +52,7 @@ load-json: use [
 
         lambda [val [text!]][
             all [
-                ok? parse val [word1 opt some word+]
+                did parse val [word1 opt some word+]
                 to word! val
             ]
         ]
@@ -75,7 +72,7 @@ load-json: use [
 
         as-num: lambda [val [text!]][
             case [
-                not ok? parse val [opt "-" some dg][to decimal! val]
+                didn't parse val [opt "-" some dg] [to decimal! val]
                 error? val: to integer! val [to rune! val]
                 val [val]
             ]
@@ -104,7 +101,7 @@ load-json: use [
 
             lambda [text [<opt> text!]][
                 either not text [make text! 0][
-                    all [ok? parse text [opt some [to "\" escape] to <end>], text]
+                    all [did parse text [opt some [to "\" escape] to <end>], text]
                 ]
             ]
         ]
@@ -172,7 +169,7 @@ load-json: use [
         is-flat: flat
         tree: here: make block! 0
 
-        either ok? parse json either padded [
+        either did parse json either padded [
             [space ident space "(" space opt value space ")" opt ";" space]
         ][
             [space opt value space]
@@ -216,7 +213,7 @@ to-json: use [
         dg: charset "0123456789"
         nm: [opt "-" some dg]
 
-        [(either ok? parse next form here.1 [mk: across nm][emit mk][emits here.1])]
+        [(either did parse next form here.1 [mk: across nm][emit mk][emits here.1])]
     ]
 
     emit-date: use [pad second][  ; converts date! to RFC 3339 Date String
@@ -320,7 +317,7 @@ to-json: use [
     lambda [data][
         json: make text! 1024
         all [
-            ok? parse compose [(data)][here: <here>, value]
+            did parse compose [(data)][here: <here>, value]
             json
         ]
     ]
