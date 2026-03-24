@@ -287,7 +287,7 @@ to-json: use [
         | date! emit-date
         | rune! emit-rune
         | [
-            any-string?/ | word! | lit-word?/ | tuple! | pair! | money! | time!
+            any-string?/ | word! | lit-word?/ | tuple! | pair! | time!
         ] (emits escape form here.1)
         | word! (emits escape form here.1)
 
